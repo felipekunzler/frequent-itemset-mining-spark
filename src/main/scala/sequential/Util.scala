@@ -1,5 +1,7 @@
-import Apriori.Itemset
-import Association.Rule
+package sequential
+
+import sequential.Apriori.Itemset
+import sequential.NaiveFIM.Rule
 
 import scala.collection.immutable.SortedMap
 import scala.io.Source
@@ -28,7 +30,7 @@ object Util {
   }
 
   def printItemsets(itemsets: List[Itemset]) = {
-    SortedMap(itemsets.groupBy(itemset => itemset.size).toSeq:_*)
+    SortedMap(itemsets.groupBy(itemset => itemset.size).toSeq: _*)
       .mapValues(i => i.map(set => s"{${set.mkString(", ")}}").mkString(", "))
       .foreach(t => println(s"[${t._1}] ${t._2}"))
   }

@@ -1,6 +1,8 @@
-import Apriori.Itemset
-import Association.Rule
-import Util.printItemsets
+package sequential
+
+import sequential.Apriori.Itemset
+import sequential.NaiveFIM.Rule
+import sequential.Util.printItemsets
 
 import scala.collection.mutable
 
@@ -8,20 +10,20 @@ import scala.collection.mutable
   * 1. Gerar combinações de itemsets candidatos
   * 2. Filtrar de acordo com suporte minimo
   */
-object Association {
+object NaiveFIM {
 
   type Rule = (List[String], List[String])
 
   def main(args: Array[String]): Unit = {
     val transactions: List[List[String]] = Util.parseTransactions("/transactions.txt")
-    printItemsets(new Association().findFrequentItemsets(transactions, 3))
+    printItemsets(new NaiveFIM().findFrequentItemsets(transactions, 3))
   }
 
 }
 
-class Association {
+class NaiveFIM extends FIM {
 
-  def findFrequentItemsets(transactions: List[List[String]], minSupport: Int): List[Itemset] = {
+  def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
     val items = transactions.flatten.distinct
     val candidateItemsets = subsets(items) :+ items.sorted
     new Apriori().filterFrequentItemsets(candidateItemsets, transactions, minSupport)

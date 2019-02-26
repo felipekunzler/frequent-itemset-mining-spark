@@ -1,5 +1,7 @@
-import Apriori.Itemset
-import Util.printItemsets
+package sequential
+
+import sequential.Apriori.Itemset
+import sequential.Util.printItemsets
 
 import scala.collection.mutable
 
@@ -22,7 +24,7 @@ object Apriori {
 
 }
 
-class Apriori {
+class Apriori extends FIM {
 
   def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
     val items = findSingletons(transactions, minSupport)
@@ -38,10 +40,6 @@ class Apriori {
       }
     }
     frequentItemsets.values.flatten.toList
-  }
-
-  def findFrequentItemsets(transactions: String, minSupport: Int): List[Itemset] = {
-    findFrequentItemsets(Util.parseTransactionsByText(transactions), minSupport)
   }
 
   def filterFrequentItemsets(possibleItemsets: List[Itemset], transactions: List[Itemset], minSupport: Int) = {
@@ -78,7 +76,7 @@ class Apriori {
   private def findKItemsets(items: List[Itemset], n: Int) = {
     // TODO: optimize generation
     val flatItems = items.flatten.distinct
-    (new Association().subsets(flatItems) :+ flatItems.sorted)
+    (new NaiveFIM().subsets(flatItems) :+ flatItems.sorted)
       .filter(_.size == n)
   }
 
