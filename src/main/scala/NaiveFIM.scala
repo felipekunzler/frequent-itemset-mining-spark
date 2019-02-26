@@ -1,7 +1,11 @@
+import Apriori.Itemset
+import Association.Rule
+import Util.printItemsets
+
 import scala.collection.mutable
 
 /**
-  * 1. Gerar combinações de itemsets
+  * 1. Gerar combinações de itemsets candidatos
   * 2. Filtrar de acordo com suporte minimo
   */
 object Association {
@@ -10,29 +14,17 @@ object Association {
 
   def main(args: Array[String]): Unit = {
     val transactions: List[List[String]] = Util.parseTransactions("/transactions.txt")
-    findFrequentSets(transactions, 4)
+    printItemsets(new Association().findFrequentItemsets(transactions, 3))
   }
 
-  def findFrequentSets(transactions: List[List[String]], minSupport: Int) = {
-    val rules = mutable.Map[Rule, Int]()
-    for (rule <- combinations(transactions)) {
-      val count = rules.getOrElse(rule, 0)
-      rules.update(rule, count + 1)
-    }
+}
 
-    rules.filter(t => t._2 >= minSupport)
-      .foreach(t => println(Util.formatRule(t._1) + f" [${t._2}]"))
-  }
+class Association {
 
-  def findFrequentRules(transactions: List[List[String]], minSupport: Int) = {
-    val rules = mutable.Map[Rule, Int]()
-    for (rule <- combinations(transactions)) {
-      val count = rules.getOrElse(rule, 0)
-      rules.update(rule, count + 1)
-    }
-
-    rules.filter(t => t._2 >= minSupport)
-      .foreach(t => println(Util.formatRule(t._1) + f" [${t._2}]"))
+  def findFrequentItemsets(transactions: List[List[String]], minSupport: Int): List[Itemset] = {
+    val items = transactions.flatten.distinct
+    val candidateItemsets = subsets(items) :+ items.sorted
+    new Apriori().filterFrequentItemsets(candidateItemsets, transactions, minSupport)
   }
 
   /**
@@ -61,6 +53,17 @@ object Association {
       sets = sets :+ subset.sorted
     }
     sets
+  }
+
+  def findFrequentRules(transactions: List[List[String]], minSupport: Int) = {
+    val rules = mutable.Map[Rule, Int]()
+    for (rule <- combinations(transactions)) {
+      val count = rules.getOrElse(rule, 0)
+      rules.update(rule, count + 1)
+    }
+
+    rules.filter(t => t._2 >= minSupport)
+      .foreach(t => println(Util.formatRule(t._1) + f" [${t._2}]"))
   }
 
   /**

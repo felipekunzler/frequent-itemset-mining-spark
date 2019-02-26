@@ -16,7 +16,7 @@ object Apriori {
   def main(args: Array[String]): Unit = {
     val apriori = new Apriori()
     val transactions: List[Itemset] = Util.parseTransactions("/transactions.txt")
-    val frequentItemsets = apriori.findFrequentItemsets(transactions, 4)
+    val frequentItemsets = apriori.findFrequentItemsets(transactions, 3)
     printItemsets(frequentItemsets)
   }
 
@@ -44,7 +44,7 @@ class Apriori {
     findFrequentItemsets(Util.parseTransactionsByText(transactions), minSupport)
   }
 
-  private def filterFrequentItemsets(possibleItemsets: List[Itemset], transactions: List[Itemset], minSupport: Int) = {
+  def filterFrequentItemsets(possibleItemsets: List[Itemset], transactions: List[Itemset], minSupport: Int) = {
     val map = mutable.Map() ++ possibleItemsets.map((_, 0)).toMap
     for (t <- transactions) {
       for ((itemset, count) <- map) {
@@ -78,7 +78,7 @@ class Apriori {
   private def findKItemsets(items: List[Itemset], n: Int) = {
     // TODO: optimize generation
     val flatItems = items.flatten.distinct
-    (Association.subsets(flatItems) :+ flatItems.sorted)
+    (new Association().subsets(flatItems) :+ flatItems.sorted)
       .filter(_.size == n)
   }
 
