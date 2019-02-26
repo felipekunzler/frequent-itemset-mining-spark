@@ -8,7 +8,7 @@ class AprioriTest extends FunSuite {
          |a,b,c
          |a,b,c
       """.stripMargin
-    val frequentSets = Apriori.findFrequentItemsets(itemsets, 3)
+    val frequentSets = new Apriori().findFrequentItemsets(itemsets, 3)
     assert(frequentSets.size === 7)
     assert(frequentSets(6) === List("a", "b", "c"))
   }
@@ -23,8 +23,7 @@ class AprioriTest extends FunSuite {
          |1,2
          |1,2,3,4
       """.stripMargin
-    val frequentSets = Apriori.findFrequentItemsets(itemsets, 3) // sup = (itemsets.size() * 0.4 + 0.5).toInt
-    Util.printItemsets(frequentSets)
+    val frequentSets = new Apriori().findFrequentItemsets(itemsets, 3) // sup = (itemsets.size() * 0.4 + 0.5).toInt
     val expectedSets = List(
       List("1"), List("2"), List("3"),
       List("1", "3"),
