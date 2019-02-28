@@ -32,9 +32,9 @@ class Apriori extends FIM {
 
     var k = 1
     while (frequentItemsets.get(k).nonEmpty) {
-      val candidateKItemsets = findKItemsets(frequentItemsets(k), k + 1)
-      val frequents = filterFrequentItemsets(candidateKItemsets, transactions, minSupport)
       k = k + 1
+      val candidateKItemsets = findKItemsets(frequentItemsets(k - 1), k)
+      val frequents = filterFrequentItemsets(candidateKItemsets, transactions, minSupport)
       if (frequents.nonEmpty) {
         frequentItemsets.update(k, frequents)
       }
