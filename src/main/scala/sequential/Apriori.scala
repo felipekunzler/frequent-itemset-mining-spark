@@ -90,6 +90,13 @@ class Apriori extends FIM {
     * TODO: Do all subsets need to be checked or only those containing n-1 and n-2?
     */
   private def isItemsetValid(itemset: List[String], previousItemsets: List[Itemset]): Boolean = {
+    for (i <- itemset.indices) {
+      val subset = itemset.diff(List(itemset(i)))
+      val found = previousItemsets.contains(subset)
+      if (!found) {
+        return false
+      }
+    }
     true
   }
 
