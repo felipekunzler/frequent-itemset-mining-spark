@@ -4,6 +4,7 @@ import sequential.Apriori.Itemset
 import sequential.Util.printItemsets
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * 1. Encontrar 1-itemsets frequentes
@@ -33,7 +34,7 @@ class Apriori extends FIM {
     var k = 1
     while (frequentItemsets.get(k).nonEmpty) {
       k = k + 1
-      val candidateKItemsets = findKItemsets(frequentItemsets(k - 1), k)
+      val candidateKItemsets = findKItemsets(frequentItemsets(k - 1))
       val frequents = filterFrequentItemsets(candidateKItemsets, transactions, minSupport)
       if (frequents.nonEmpty) {
         frequentItemsets.update(k, frequents)
@@ -60,7 +61,48 @@ class Apriori extends FIM {
       .groupBy(identity)
       .map(t => (t._1, t._2.size))
       .filter(_._2 >= minSupport)
-      .keySet.toList
+      .keySet.toList.sorted
+  }
+
+  /**
+    * in: {AB}, {AC}, {BC}, {BD}
+    * generates: {ABC}, {BCD}
+    * after pruning: {ABC}
+    */
+  private def findKItemsets(items: List[Itemset]) = {
+    val nextKItemsets = ArrayBuffer[Itemset]()
+    for (i <- items.indices) {
+      for (j <- i + 1 until items.size) {
+        if (items(i).size == 1 || allElementsEqualButLast(items(i), items(j))) {
+          val newItemset = (items(i) :+ items(j).last).sorted
+          // Prune new itemsets that are not frequent by checking all k-1 itemsets
+          if (isItemsetValid(newItemset, items))
+            nextKItemsets += newItemset
+        }
+      }
+    }
+    nextKItemsets.toList
+  }
+
+  /**
+    * Performs pruning by checking if all subsets of the new itemset exist within
+    * the k-1 itemsets.
+    * TODO: Do all subsets need to be checked or only those containing n-1 and n-2?
+    */
+  private def isItemsetValid(itemset: List[String], previousItemsets: List[Itemset]): Boolean = {
+    true
+  }
+
+  private def allElementsEqualButLast(a: List[String], b: List[String]): Boolean = {
+    for (i <- 0 until a.size - 1) {
+      if (a(i) != b(i))
+        return false
+    }
+    //if (a.last == b.last) {
+    if (a.last >= b.last) {
+      return false
+    }
+    true
   }
 
   /**
@@ -68,13 +110,12 @@ class Apriori extends FIM {
     * B,C
     * B,D
     * =>
-    * ABC
+    * ABC -> no AC
     * ABD -> não são frequentes pq AD não foi frequente ali em cima.
     * ACD ->
     * BCD
-    */
-  private def findKItemsets(items: List[Itemset], n: Int) = {
-    // TODO: optimize generation
+    **/
+  private def findKItemsetsNaive(items: List[Itemset], n: Int) = {
     val flatItems = items.flatten.distinct
     (new NaiveFIM().subsets(flatItems) :+ flatItems.sorted)
       .filter(_.size == n)
