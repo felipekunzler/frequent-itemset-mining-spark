@@ -15,8 +15,8 @@ object NaiveFIM {
   type Rule = (List[String], List[String])
 
   def main(args: Array[String]): Unit = {
-    val transactions: List[List[String]] = Util.parseTransactions("/transactions.txt")
-    printItemsets(new NaiveFIM().findFrequentItemsets(transactions, 3))
+    val transactions: List[List[String]] = Util.parseTransactions("/GroceryStoreDataSet.csv")
+    printItemsets(new NaiveFIM().execute(transactions, 3))
   }
 
 }

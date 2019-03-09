@@ -17,9 +17,8 @@ object Apriori {
   type Itemset = List[String]
 
   def main(args: Array[String]): Unit = {
-    val apriori = new Apriori()
-    val transactions: List[Itemset] = Util.parseTransactions("/transactions.txt")
-    val frequentItemsets = apriori.findFrequentItemsets(transactions, 3)
+    val transactions: List[Itemset] = Util.parseTransactions("/GroceryStoreDataSet.csv")
+    val frequentItemsets = new Apriori().execute(transactions, 3)
     printItemsets(frequentItemsets)
   }
 
@@ -87,7 +86,7 @@ class Apriori extends FIM {
   /**
     * Performs pruning by checking if all subsets of the new itemset exist within
     * the k-1 itemsets.
-    * TODO: Do all subsets need to be checked or only those containing n-1 and n-2?
+    * Do all subsets need to be checked or only those containing n-1 and n-2?
     */
   private def isItemsetValid(itemset: List[String], previousItemsets: List[Itemset]): Boolean = {
     for (i <- itemset.indices) {
@@ -110,22 +109,6 @@ class Apriori extends FIM {
       return false
     }
     true
-  }
-
-  /**
-    * A,B
-    * B,C
-    * B,D
-    * =>
-    * ABC -> no AC
-    * ABD -> não são frequentes pq AD não foi frequente ali em cima.
-    * ACD ->
-    * BCD
-    **/
-  private def findKItemsetsNaive(items: List[Itemset], n: Int) = {
-    val flatItems = items.flatten.distinct
-    (new NaiveFIM().subsets(flatItems) :+ flatItems.sorted)
-      .filter(_.size == n)
   }
 
 }
