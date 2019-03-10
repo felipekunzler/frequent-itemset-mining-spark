@@ -4,6 +4,8 @@ import sequential.Apriori.Itemset
 import sequential.FIM
 import sequential.Util.printItemsets
 
+import scala.collection.mutable
+
 object FPGrowth {
 
   def main(args: Array[String]): Unit = {
@@ -16,7 +18,7 @@ object FPGrowth {
          |1,2
          |1,2,3,4
       """.stripMargin
-    val frequentItemsets = new FPGrowth().execute(itemsets, 1)
+    val frequentItemsets = new FPGrowth().execute(itemsets, 0)
     printItemsets(frequentItemsets)
   }
 
@@ -25,15 +27,15 @@ object FPGrowth {
 /**
   * 1. Find singletons, order by most frequent
   * 2. Build FP-Tree by creating all possible paths (TODO: Links between items)
-  * 3. Build conditional FP-Tree
+  * 3. For each singleton, find a list of conditional pattern base
+  * 4. Build the conditional FP-Tree
   */
 class FPGrowth extends FIM {
 
   override def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
-    val singletons = findSingletons(transactions, minSupport)
+    val singletons = mutable.LinkedHashMap(findSingletons(transactions, minSupport).map(i => i -> Option.empty[FPNode]): _*)
     val fpTree = new FPTree(transactions, minSupport, singletons)
-    fpTree.rootNode
-
+    val condFPTree = fpTree.conditionalTreeForPrefix("4", minSupport)
 
     List()
   }
