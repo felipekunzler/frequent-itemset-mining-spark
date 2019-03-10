@@ -23,7 +23,7 @@ object NaiveFIM {
 
 class NaiveFIM extends FIM {
 
-  def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
+  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
     val items = transactions.flatten.distinct
     val candidateItemsets = subsets(items) :+ items.sorted
     new Apriori().filterFrequentItemsets(candidateItemsets, transactions, minSupport)

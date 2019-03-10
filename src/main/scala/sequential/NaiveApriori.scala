@@ -19,7 +19,7 @@ object NaiveApriori {
 
 class NaiveApriori extends FIM {
 
-  def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
+  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
     val items = findSingletons(transactions, minSupport)
     val frequentItemsets = mutable.Map(1 -> items.map(i => List(i)))
 
