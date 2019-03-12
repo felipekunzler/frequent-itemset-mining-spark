@@ -6,7 +6,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
-class FPTree(transactions: List[Itemset], minSupport: Int, singletons: mutable.Map[String, Option[FPNode]]) {
+class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutable.Map[String, Option[FPNode]]) {
 
   val rootNode = new FPNode(null, 0, null)
 
@@ -49,7 +49,7 @@ class FPTree(transactions: List[Itemset], minSupport: Int, singletons: mutable.M
     var bottomNode = singletons(prefix).get
     while (bottomNode != null) {
       var node = bottomNode.parent
-      var prefixSupport = bottomNode.support
+      val prefixSupport = bottomNode.support
       val itemset = mutable.ListBuffer[String]()
       while (node != null) {
         itemset.insert(0, node.item)
@@ -63,6 +63,16 @@ class FPTree(transactions: List[Itemset], minSupport: Int, singletons: mutable.M
 
     val header = mutable.LinkedHashMap(singletons.keySet.toSeq.map(i => i -> Option.empty[FPNode]): _*)
     new FPTree(conditionalPatternBase.toList, minSupport, header)
+  }
+
+  def isPrefixFrequent(prefix: String, minSupport: Int): Boolean = {
+    var support = 0
+    var node = singletons(prefix).orNull
+    while (node != null) {
+      support += node.support
+      node = node.itemLink
+    }
+    support >= minSupport
   }
 
 }

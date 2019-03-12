@@ -17,7 +17,17 @@ object Apriori {
   type Itemset = List[String]
 
   def main(args: Array[String]): Unit = {
-    val transactions: List[Itemset] = Util.parseTransactions("/GroceryStoreDataSet.csv")
+    var transactions: List[Itemset] = Util.parseTransactions("/GroceryStoreDataSet.csv")
+    transactions = Util.parseTransactionsByText(
+      """
+        |1,3
+        |1,2,3
+        |1
+        |1,3,4
+        |3
+        |1,2
+        |1,2,3,4
+      """.stripMargin)
     val frequentItemsets = new Apriori().execute(transactions, 3)
     printItemsets(frequentItemsets)
   }

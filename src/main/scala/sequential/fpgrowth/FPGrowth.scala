@@ -18,7 +18,7 @@ object FPGrowth {
          |1,2
          |1,2,3,4
       """.stripMargin
-    val frequentItemsets = new FPGrowth().execute(itemsets, 0)
+    val frequentItemsets = new FPGrowth().execute(itemsets, 3)
     printItemsets(frequentItemsets)
   }
 
@@ -35,9 +35,30 @@ class FPGrowth extends FIM {
   override def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
     val singletons = mutable.LinkedHashMap(findSingletons(transactions, minSupport).map(i => i -> Option.empty[FPNode]): _*)
     val fpTree = new FPTree(transactions, minSupport, singletons)
-    val condFPTree = fpTree.conditionalTreeForPrefix("4", minSupport)
 
-    List()
+    singletons.keys.toList.reverse
+      .flatMap(s => findFrequentItemsets(fpTree, List(s), minSupport))
+  }
+
+  def findFrequentItemsets(fpTree: FPTree, prefix: List[String], minSupport: Int) : List[Itemset] = {
+    val isFrequent = fpTree.isPrefixFrequent(prefix.head, minSupport)
+    if (isFrequent) {
+      val condFPTree = fpTree.conditionalTreeForPrefix(prefix.head, minSupport)
+      val prefixes = generatePrefixes(prefix, fpTree.singletons.keySet)
+      return prefix.sorted +: prefixes.flatMap(p => findFrequentItemsets(condFPTree, p, minSupport))
+    }
+    List.empty
+  }
+
+  /**
+    * Generates all possible prefixes for a given prefix.
+    * Header: {a, b, c, d}
+    * Prefix: {d} => Out: {da, db, dc}
+    * Prefix: {dc} => Out: {dca, dcb}
+    */
+  private def generatePrefixes(prefix: List[String], header: scala.collection.Set[String]): List[List[String]] = {
+    header.filter(i => !prefix.contains(i))
+      .map(i => i +: prefix).toList
   }
 
   private def findSingletons(transactions: List[Itemset], minSupport: Int) = {

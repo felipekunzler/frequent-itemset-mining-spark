@@ -1,10 +1,11 @@
 import org.scalatest.FunSuite
 import sequential.Apriori.Itemset
+import sequential.fpgrowth.FPGrowth
 import sequential.{Apriori, FIM, NaiveFIM, Util}
 
 class FIMTest extends FunSuite {
 
-  private val fimInstances: Set[FIM] = Set(new Apriori(), new NaiveFIM())
+  private val fimInstances: Set[FIM] = Set(new Apriori(), new NaiveFIM(), new FPGrowth())
 
   fimInstances.foreach(fim => {
     val className = fim.getClass.getSimpleName
