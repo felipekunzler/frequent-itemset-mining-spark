@@ -10,7 +10,7 @@ trait FIM {
     val t0 = System.currentTimeMillis()
     val itemsets = findFrequentItemsets(transactions, minSupport)
     val elapsed = (System.currentTimeMillis() - t0) / 1000
-    println("Elapsed time: " + elapsed + " seconds")
+    println(s"Elapsed time: $elapsed seconds. Class: ${getClass.getSimpleName}. Items: ${transactions.size}")
     itemsets
   }
 

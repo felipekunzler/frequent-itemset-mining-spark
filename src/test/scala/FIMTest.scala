@@ -1,11 +1,12 @@
 import org.scalatest.FunSuite
+import org.scalatest.exceptions.TestFailedException
 import sequential.Apriori.Itemset
+import sequential._
 import sequential.fpgrowth.FPGrowth
-import sequential.{Apriori, FIM, NaiveFIM, Util}
 
 class FIMTest extends FunSuite {
 
-  private val fimInstances: Set[FIM] = Set(new Apriori(), new NaiveFIM(), new FPGrowth())
+  private val fimInstances: Set[FIM] = Set(new NaiveFIM(), new NaiveApriori(), new Apriori(), new FPGrowth())
 
   fimInstances.foreach(fim => {
     val className = fim.getClass.getSimpleName
@@ -28,7 +29,7 @@ class FIMTest extends FunSuite {
         """.stripMargin
 
       val frequentSets = fim.execute(itemsets, 3)
-      assertItemsetsMatch(expectedItemsets, frequentSets)
+      assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 
     test(s"$className - Many k-itemsets") {
@@ -52,17 +53,50 @@ class FIMTest extends FunSuite {
         """.stripMargin
 
       val frequentSets = fim.execute(itemsets, 3) // sup = (itemsets.size() * 0.4 + 0.5).toInt
-      assertItemsetsMatch(expectedItemsets, frequentSets)
+      assertItemsetsMatch(expectedItemsets, frequentSets, className)
+    }
+
+    test(s"$className - Ensure single item") {
+      val itemsets =
+        """
+          |1,2,3
+        """.stripMargin
+
+      val minSupport = 1
+      val frequentSets = fim.execute(itemsets, minSupport)
+      val expectedItemsets = new NaiveApriori().execute(itemsets, minSupport)
+      assertItemsetsMatch(expectedItemsets, frequentSets, className)
+    }
+
+    test(s"$className - Ensure grocery store") {
+      val itemsets = Util.parseTransactions("/GroceryStoreDataSet.csv").take(10000)
+      val minSupport = 1
+      val frequentSets = fim.execute(itemsets, minSupport)
+      val expectedItemsets = new NaiveApriori().execute(itemsets, minSupport)
+      assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 
   })
 
-  private def assertItemsetsMatch(expected: String, result: List[Itemset]) = {
+  private def assertItemsetsMatch(expected: String, result: List[Itemset], className: String): Unit = {
     val expectedSets = Util.parseTransactionsByText(expected)
-    Util.printItemsets(result)
-    println()
-    assert(result.size === expectedSets.size)
-    assert(expectedSets.intersect(result).size === expectedSets.size)
+    assertItemsetsMatch(expectedSets, result, className)
+  }
+
+  private def assertItemsetsMatch(expectedSets: List[Itemset], result: List[Itemset], className: String): Unit = {
+    try {
+      assert(result.size === expectedSets.size)
+      assert(expectedSets.intersect(result).size === expectedSets.size)
+    }
+    catch {
+      case e: TestFailedException => {
+        println(s"Expected for $className:")
+        Util.printItemsets(expectedSets)
+        println("\nResult:")
+        Util.printItemsets(result)
+        throw e
+      }
+    }
   }
 
   test("itemsets comparison") {
