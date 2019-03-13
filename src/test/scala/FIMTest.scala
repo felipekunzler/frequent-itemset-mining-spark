@@ -7,6 +7,7 @@ import sequential.fpgrowth.FPGrowth
 class FIMTest extends FunSuite {
 
   private val fimInstances: Set[FIM] = Set(new NaiveFIM(), new NaiveApriori(), new Apriori(), new FPGrowth())
+  private val sourceOfTruth = new NaiveApriori()
 
   fimInstances.foreach(fim => {
     val className = fim.getClass.getSimpleName
@@ -64,15 +65,15 @@ class FIMTest extends FunSuite {
 
       val minSupport = 1
       val frequentSets = fim.execute(itemsets, minSupport)
-      val expectedItemsets = new NaiveApriori().execute(itemsets, minSupport)
+      val expectedItemsets = sourceOfTruth.execute(itemsets, minSupport)
       assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 
     test(s"$className - Ensure grocery store") {
-      val itemsets = Util.parseTransactions("/GroceryStoreDataSet.csv").take(10000)
+      val itemsets = Util.parseTransactions("/GroceryStoreDataSet.csv").take(1000)
       val minSupport = 1
       val frequentSets = fim.execute(itemsets, minSupport)
-      val expectedItemsets = new NaiveApriori().execute(itemsets, minSupport)
+      val expectedItemsets = sourceOfTruth.execute(itemsets, minSupport)
       assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 

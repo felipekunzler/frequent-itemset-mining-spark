@@ -74,6 +74,8 @@ class Apriori extends FIM {
   }
 
   /**
+    * Given that all itemsets are sorted, merge two itemsets if all items are the same but the last.
+    * Example:
     * in: {AB}, {AC}, {BC}, {BD}
     * generates: {ABC}, {BCD}
     * after pruning: {ABC}
@@ -114,8 +116,7 @@ class Apriori extends FIM {
       if (a(i) != b(i))
         return false
     }
-    //if (a.last == b.last) {
-    if (a.last >= b.last) {
+    if (a.last == b.last) {
       return false
     }
     true
