@@ -3,11 +3,12 @@ import org.scalatest.exceptions.TestFailedException
 import sequential.Apriori.Itemset
 import sequential._
 import sequential.fpgrowth.FPGrowth
+import spark.YAFIM
 
 class FIMTest extends FunSuite {
 
-  private val fimInstances: Set[FIM] = Set(new NaiveFIM(), new NaiveApriori(), new Apriori(), new FPGrowth())
-  private val sourceOfTruth = new NaiveApriori()
+  private val fimInstances: Set[FIM] = Set(new NaiveFIM(), new NaiveApriori(), new Apriori(), new FPGrowth(), new YAFIM())
+  private val sourceOfTruth = new FPGrowth()
 
   fimInstances.foreach(fim => {
     val className = fim.getClass.getSimpleName
