@@ -80,7 +80,7 @@ class Apriori extends FIM {
     * generates: {ABC}, {BCD}
     * after pruning: {ABC}
     */
-  private def findKItemsets(items: List[Itemset]) = {
+  def findKItemsets(items: List[Itemset]) = {
     val nextKItemsets = ArrayBuffer[Itemset]()
     for (i <- items.indices) {
       for (j <- i + 1 until items.size) {

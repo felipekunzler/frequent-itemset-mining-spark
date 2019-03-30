@@ -2,4 +2,11 @@ name := "frequent-itemset-mining-spark"
 version := "1.0"
 scalaVersion := "2.11.12"
 
-libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.5" % "test"
+val sparkVersion = "2.4.0"
+
+// %% = appends scala version in dependency
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test",
+  "org.apache.spark" %% "spark-core" % sparkVersion,
+  "org.apache.spark" %% "spark-mllib" % sparkVersion
+)
