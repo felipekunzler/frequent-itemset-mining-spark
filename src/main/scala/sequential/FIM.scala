@@ -9,13 +9,16 @@ trait FIM {
   def execute(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
     val t0 = System.currentTimeMillis()
     val itemsets = findFrequentItemsets(transactions, minSupport)
-    val elapsed = (System.currentTimeMillis() - t0) / 1000
-    println(s"Elapsed time: $elapsed seconds. Class: ${getClass.getSimpleName}. Items: ${transactions.size}")
+    if (executionTime == 0)
+      executionTime = System.currentTimeMillis() - t0
+    println(f"Elapsed time: ${executionTime/1000d}%1.2f seconds. Class: ${getClass.getSimpleName}. Items: ${transactions.size}")
     itemsets
   }
 
   def execute(transactions: String, minSupport: Int): List[Itemset] = {
     execute(Util.parseTransactionsByText(transactions), minSupport)
   }
+
+  var executionTime: Long = 0
 
 }

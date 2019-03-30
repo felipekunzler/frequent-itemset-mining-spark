@@ -53,6 +53,7 @@ class YAFIM extends FIM {
       .master("local[4]")
       .getOrCreate()
     spark.sparkContext.setLogLevel("WARN")
+    val t0 = System.currentTimeMillis()
 
     val transactionsRDD: RDD[Itemset] = spark.sparkContext.parallelize(transactions)
     val singletonsRDD = transactionsRDD
@@ -73,7 +74,9 @@ class YAFIM extends FIM {
         frequentItemsets.update(k, kFrequentItemsetsRDD.collect().toList)
       }
     }
-    frequentItemsets.values.flatten.toList
+    val result = frequentItemsets.values.flatten.toList
+    executionTime = System.currentTimeMillis() - t0
+    result
   }
 
   private def filterFrequentItemsets(candidates: List[Itemset], transactionsRDD: RDD[Itemset], minSupport: Int) = {
