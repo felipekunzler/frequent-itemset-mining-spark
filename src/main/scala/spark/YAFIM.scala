@@ -34,33 +34,45 @@ object YAFIM {
   * 1. Generate singletons
   * 2. Find K+1 frequent itemsets
   */
-  // output all candidates from this transaction of size n. e.g:
-  //    candidates: {1,3}, {1,2}, {1,4}, {5,6}
-  //    t: {1,2,3}
-  //    out: {1,3}, {1,2}
-  // either 1. loop over all candidates and output those who are a subset of the transaction
-  // manter opção 1 também
-  // or, 2. generate all possible candidates of size n from T and check on the hash tree if exists and outputs it
-  // 2 seems to be recommended.
-  // TODO:
-  //  1. Implement Ct = subset(Ck, t). Candidates from transaction
-  //  2. Piece YAFIM together
-  //  3. Understand Hash Tree for sup counting. Why Hash Tree instead of a normal Tree?
+// output all candidates from this transaction of size n. e.g:
+//    candidates: {1,3}, {1,2}, {1,4}, {5,6}
+//    t: {1,2,3}
+//    out: {1,3}, {1,2}
+// either 1. loop over all candidates and output those who are a subset of the transaction
+// manter opção 1 também
+// or, 2. generate all possible candidates of size n from T and check on the hash tree if exists and outputs it
+// 2 seems to be recommended.
+// TODO:
+//  1. Implement Ct = subset(Ck, t). Candidates from transaction
+//  2. Piece YAFIM together
+//  3. Understand Hash Tree for sup counting. Why Hash Tree instead of a normal Tree?
 class YAFIM extends FIM {
 
-  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
-    val support = Util.absoluteSupport(minSupport, transactions.size)
-
+  override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
     val spark = SparkSession.builder()
       .appName("YAFIM")
       .master("local[4]")
       .config("spark.eventLog.enabled", "true")
       .getOrCreate()
+
     val sc = spark.sparkContext
     sc.setLogLevel("WARN")
     val t0 = System.currentTimeMillis()
 
-    val transactionsRDD: RDD[Itemset] = sc.parallelize(transactions)
+    var transactionsRDD: RDD[Itemset] = null
+    var support: Int = 0
+    if (!fileName.isEmpty) {
+      transactionsRDD = sc.textFile(getClass.getResource(fileName).getPath)
+        .filter(!_.trim.isEmpty)
+        .map(_.split(separator))
+        .map(l => l.map(_.trim).toList)
+        .cache()
+    }
+    else {
+      transactionsRDD = sc.parallelize(transactions)
+      support = Util.absoluteSupport(minSupport, transactions.size)
+    }
+
     val singletonsRDD = transactionsRDD
       .flatMap(identity)
       .map(item => (item, 1))
@@ -69,7 +81,7 @@ class YAFIM extends FIM {
       .map(_._1)
 
     val frequentItemsets = mutable.Map(1 -> singletonsRDD.map(List(_)).collect().toList)
-    // TODO: consider reading from the file directly, maybe
+
     var k = 1
     while (frequentItemsets.get(k).nonEmpty) {
       k += 1

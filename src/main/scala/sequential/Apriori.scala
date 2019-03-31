@@ -36,7 +36,7 @@ object Apriori {
 
 class Apriori extends FIM {
 
-  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
+  def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
     val support = Util.absoluteSupport(minSupport, transactions.size)
     val items = findSingletons(transactions, support)
     val frequentItemsets = mutable.Map(1 -> items.map(i => List(i)))
@@ -121,6 +121,15 @@ class Apriori extends FIM {
       return false
     }
     true
+  }
+
+  override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
+    if (fileName.isEmpty) {
+      findFrequentItemsets(transactions, minSupport)
+    }
+    else {
+      findFrequentItemsets(Util.parseTransactions(fileName, separator), minSupport)
+    }
   }
 
 }

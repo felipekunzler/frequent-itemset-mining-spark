@@ -23,7 +23,7 @@ object NaiveFIM {
 
 class NaiveFIM extends FIM {
 
-  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
+  override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
     val support = Util.absoluteSupport(minSupport, transactions.size)
     val items = transactions.flatten.distinct
     val candidateItemsets = subsets(items) :+ items.sorted
