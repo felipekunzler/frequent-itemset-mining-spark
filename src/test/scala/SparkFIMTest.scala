@@ -1,14 +1,13 @@
 import java.util.UUID
 
-import org.scalatest.exceptions.TestFailedException
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
-import sequential.Apriori.Itemset
 import sequential._
 import sequential.fpgrowth.FPGrowth
 import spark.YAFIM
 
 import scala.collection.mutable
 
+// TODO: Delete
 class SparkFIMTest extends FunSuite with BeforeAndAfterAll {
 
   private val fimInstances: Set[FIM] = Set(new FPGrowth(), new Apriori(), new Apriori(), new YAFIM(), new YAFIM())
@@ -25,7 +24,7 @@ class SparkFIMTest extends FunSuite with BeforeAndAfterAll {
 
       val frequentSets = fim.execute(itemsets, minSupport)
       val expectedItemsets = sourceOfTruth.execute(itemsets, minSupport)
-      assertItemsetsMatch(expectedItemsets, frequentSets, className)
+      FIMTest.assertItemsetsMatch(expectedItemsets, frequentSets, className)
 
       executionTimes.append((className, s"$dataset (${itemsets.size})", fim.executionTime))
     }
@@ -36,27 +35,6 @@ class SparkFIMTest extends FunSuite with BeforeAndAfterAll {
       Seq(s" ${t._1} ", s" ${t._2} ", f" ${t._3 / 1000d}%1.2f ")
     })
     println("\nExecution times:\n" + Util.Tabulator.format(table))
-  }
-
-  private def assertItemsetsMatch(expected: String, result: List[Itemset], className: String): Unit = {
-    val expectedSets = Util.parseTransactionsByText(expected)
-    assertItemsetsMatch(expectedSets, result, className)
-  }
-
-  private def assertItemsetsMatch(expectedSets: List[Itemset], result: List[Itemset], className: String): Unit = {
-    try {
-      assert(result.size === expectedSets.size)
-      assert(expectedSets.intersect(result).size === expectedSets.size)
-    }
-    catch {
-      case e: TestFailedException => {
-        println(s"Expected for $className:")
-        Util.printItemsets(expectedSets)
-        println("\nResult:")
-        Util.printItemsets(result)
-        throw e
-      }
-    }
   }
 
 }

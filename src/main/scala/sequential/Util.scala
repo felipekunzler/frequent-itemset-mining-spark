@@ -8,21 +8,22 @@ import scala.io.Source
 
 object Util {
 
-  def parseTransactions(lines: List[String]): List[Itemset] = {
+  def parseTransactions(lines: List[String], separator: String): List[Itemset] = {
     lines.filter(l => !l.startsWith("#"))
       .filter(!_.trim.isEmpty)
-      .map(l => l.split(","))
+      .map(l => l.split(separator))
       .map(l => l.map(item => item.trim).toList)
   }
 
-  def parseTransactions(fileName: String): List[Itemset] = {
+  def parseTransactions(fileName: String, separator: String = ","): List[Itemset] = {
     parseTransactions(
-      Source.fromInputStream(getClass.getResourceAsStream(fileName)).getLines.toList
+      Source.fromInputStream(getClass.getResourceAsStream(fileName)).getLines.toList,
+      separator
     )
   }
 
   def parseTransactionsByText(text: String): List[Itemset] = {
-    parseTransactions(text.split("\n").toList)
+    parseTransactions(text.split("\n").toList, ",")
   }
 
   def formatRule(rule: Rule): String = {

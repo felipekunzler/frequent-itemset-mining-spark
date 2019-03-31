@@ -7,6 +7,7 @@ trait FIM {
   def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset]
 
   def execute(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
+    executionTime = 0
     val t0 = System.currentTimeMillis()
     val itemsets = findFrequentItemsets(transactions, minSupport)
     if (executionTime == 0)

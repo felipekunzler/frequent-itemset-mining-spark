@@ -1,3 +1,4 @@
+import FIMTest.assertItemsetsMatch
 import org.scalatest.FunSuite
 import org.scalatest.exceptions.TestFailedException
 import sequential.Apriori.Itemset
@@ -80,27 +81,6 @@ class FIMTest extends FunSuite {
 
   })
 
-  private def assertItemsetsMatch(expected: String, result: List[Itemset], className: String): Unit = {
-    val expectedSets = Util.parseTransactionsByText(expected)
-    assertItemsetsMatch(expectedSets, result, className)
-  }
-
-  private def assertItemsetsMatch(expectedSets: List[Itemset], result: List[Itemset], className: String): Unit = {
-    try {
-      assert(result.size === expectedSets.size)
-      assert(expectedSets.intersect(result).size === expectedSets.size)
-    }
-    catch {
-      case e: TestFailedException => {
-        println(s"Expected for $className:")
-        Util.printItemsets(expectedSets)
-        println("\nResult:")
-        Util.printItemsets(result)
-        throw e
-      }
-    }
-  }
-
   test("itemsets comparison") {
     val items1 = List(
       List("1", "3"),
@@ -112,6 +92,31 @@ class FIMTest extends FunSuite {
     )
     assert(items1.size === items2.size)
     assert(items1.intersect(items2).size === items2.size)
+  }
+
+}
+
+object FIMTest {
+
+  def assertItemsetsMatch(expected: String, result: List[Itemset], className: String): Unit = {
+    val expectedSets = Util.parseTransactionsByText(expected)
+    assertItemsetsMatch(expectedSets, result, className)
+  }
+
+  def assertItemsetsMatch(expectedSets: List[Itemset], result: List[Itemset], className: String): Unit = {
+    try {
+      assert(result.size == expectedSets.size)
+      assert(expectedSets.intersect(result).size == expectedSets.size)
+    }
+    catch {
+      case e: TestFailedException => {
+        println(s"Expected for $className:")
+        Util.printItemsets(expectedSets)
+        println("\nResult:")
+        Util.printItemsets(result)
+        throw e
+      }
+    }
   }
 
 }
