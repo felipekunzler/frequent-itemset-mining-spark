@@ -31,7 +31,7 @@ class FIMTest extends FunSuite {
            |c
         """.stripMargin
 
-      val frequentSets = fim.execute(itemsets, 3)
+      val frequentSets = fim.executeByText(itemsets, 3)
       assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 
@@ -55,7 +55,7 @@ class FIMTest extends FunSuite {
           |1,2
         """.stripMargin
 
-      val frequentSets = fim.execute(itemsets, 3) // sup = (itemsets.size() * 0.4 + 0.5).toInt
+      val frequentSets = fim.executeByText(itemsets, 3) // sup = (itemsets.size() * 0.4 + 0.5).toInt
       assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 
@@ -66,8 +66,8 @@ class FIMTest extends FunSuite {
         """.stripMargin
 
       val minSupport = 1
-      val frequentSets = fim.execute(itemsets, minSupport)
-      val expectedItemsets = sourceOfTruth.execute(itemsets, minSupport)
+      val frequentSets = fim.executeByText(itemsets, minSupport)
+      val expectedItemsets = sourceOfTruth.executeByText(itemsets, minSupport)
       assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 

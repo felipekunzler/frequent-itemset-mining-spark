@@ -18,7 +18,7 @@ object FPGrowth {
          |1,2
          |1,2,3,4
       """.stripMargin
-    val frequentItemsets = new FPGrowth().execute(itemsets, 3)
+    val frequentItemsets = new FPGrowth().executeByText(itemsets, 3)
     printItemsets(frequentItemsets)
   }
 

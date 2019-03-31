@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
 
-  private val fimInstances: Set[FIM] = Set(new FPGrowth(), new Apriori(), new YAFIM())
+  private val fimInstances: Set[FIM] = Set(new Apriori(), new YAFIM())
 
   private val executionTimes: mutable.ListBuffer[(String, String, Long)] = mutable.ListBuffer()
   private val resultsCache: mutable.Map[String, List[Itemset]] = mutable.Map()
@@ -17,7 +17,7 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
   fimInstances.foreach(fim => {
     val className = fim.getClass.getSimpleName
 
-    Set(("T10I4D100K.txt", 0.25), ("chess.txt", 0.85), ("mushroom.txt", 0.35), ("pumsb_star.txt", 0.65)).take(1).foreach(t => {
+    Set(("mushroom.txt", 0.35), ("chess.txt", 0.85), ("pumsb_star.txt", 0.65), ("T10I4D100K.txt", 0.25)).take(1).foreach(t => {
       test(s"$className - ${t._1}") {
         val itemsets = Util.parseTransactions("/datasets/" + t._1, " ")
         val minSupport = (itemsets.size * t._2 + 0.5).toInt
@@ -27,9 +27,8 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
           resultsCache.update(t._1 + t._2, frequentSets)
 
         val expectedItemsets = resultsCache(t._1 + t._2)
-        assertItemsetsMatch(expectedItemsets, frequentSets, className)
-
         executionTimes.append((className, s"${t._1} (${itemsets.size})", fim.executionTime))
+        assertItemsetsMatch(expectedItemsets, frequentSets, className)
       }
     })
   })

@@ -1,5 +1,6 @@
 package spark
 
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import sequential.Apriori.Itemset
@@ -51,11 +52,13 @@ class YAFIM extends FIM {
     val spark = SparkSession.builder()
       .appName("YAFIM")
       .master("local[4]")
+      .config("spark.eventLog.enabled", "true")
       .getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
+    val sc = spark.sparkContext
+    sc.setLogLevel("WARN")
     val t0 = System.currentTimeMillis()
 
-    val transactionsRDD: RDD[Itemset] = spark.sparkContext.parallelize(transactions)
+    val transactionsRDD: RDD[Itemset] = sc.parallelize(transactions)
     val singletonsRDD = transactionsRDD
       .flatMap(identity)
       .map(item => (item, 1))
@@ -64,12 +67,13 @@ class YAFIM extends FIM {
       .map(_._1)
 
     val frequentItemsets = mutable.Map(1 -> singletonsRDD.map(List(_)).collect().toList)
-
+    // TODO: consider reading from the file directly, maybe
     var k = 1
     while (frequentItemsets.get(k).nonEmpty) {
       k += 1
       val candidates = new Apriori().findKItemsets(frequentItemsets(k - 1))
-      val kFrequentItemsetsRDD = filterFrequentItemsets(candidates, transactionsRDD, minSupport)
+      val candidatesBC = sc.broadcast(candidates)
+      val kFrequentItemsetsRDD = filterFrequentItemsets(candidatesBC, transactionsRDD, minSupport)
       if (!kFrequentItemsetsRDD.isEmpty()) {
         frequentItemsets.update(k, kFrequentItemsetsRDD.collect().toList)
       }
@@ -79,9 +83,9 @@ class YAFIM extends FIM {
     result
   }
 
-  private def filterFrequentItemsets(candidates: List[Itemset], transactionsRDD: RDD[Itemset], minSupport: Int) = {
+  private def filterFrequentItemsets(candidates: Broadcast[List[Itemset]], transactionsRDD: RDD[Itemset], minSupport: Int) = {
     val filteredCandidatesRDD = transactionsRDD.flatMap(t => {
-      candidates.flatMap(c => {
+      candidates.value.flatMap(c => {
         // candidate exists within the transaction
         if (c.intersect(t).length == c.length)
           List(c)
