@@ -4,7 +4,7 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import sequential.Apriori.Itemset
-import sequential.Util.printItemsets
+import sequential.Util.{absoluteSupport, printItemsets}
 import sequential.{Apriori, FIM, Util}
 
 import scala.collection.mutable
@@ -53,6 +53,8 @@ class YAFIM extends FIM {
       .appName("YAFIM")
       .master("local[4]")
       .config("spark.eventLog.enabled", "true")
+      .config("spark.driver.memory", "2g")
+      .config("spark.executor.memory", "2g")
       .getOrCreate()
 
     val sc = spark.sparkContext
@@ -61,16 +63,18 @@ class YAFIM extends FIM {
 
     var transactionsRDD: RDD[Itemset] = null
     var support: Int = 0
+
     if (!fileName.isEmpty) {
-      transactionsRDD = sc.textFile(getClass.getResource(fileName).getPath)
+      transactionsRDD = sc.textFile(getClass.getResource(fileName).getPath, 4)
         .filter(!_.trim.isEmpty)
         .map(_.split(separator))
         .map(l => l.map(_.trim).toList)
         .cache()
+      support = absoluteSupport(minSupport, transactionsRDD.count().toInt)
     }
     else {
       transactionsRDD = sc.parallelize(transactions)
-      support = Util.absoluteSupport(minSupport, transactions.size)
+      support = absoluteSupport(minSupport, transactions.size)
     }
 
     val singletonsRDD = transactionsRDD
