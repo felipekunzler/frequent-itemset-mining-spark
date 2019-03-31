@@ -20,8 +20,7 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
     Set(("mushroom.txt", 0.35), ("chess.txt", 0.85), ("pumsb_star.txt", 0.65), ("T10I4D100K.txt", 0.25)).take(1).foreach(t => {
       test(s"$className - ${t._1}") {
         val itemsets = Util.parseTransactions("/datasets/" + t._1, " ")
-        val minSupport = (itemsets.size * t._2 + 0.5).toInt
-        val frequentSets = fim.execute(itemsets, minSupport)
+        val frequentSets = fim.execute(itemsets, t._2)
 
         if (!resultsCache.contains(t._1 + t._2))
           resultsCache.update(t._1 + t._2, frequentSets)

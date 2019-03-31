@@ -48,7 +48,9 @@ object YAFIM {
   //  3. Understand Hash Tree for sup counting. Why Hash Tree instead of a normal Tree?
 class YAFIM extends FIM {
 
-  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
+  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
+    val support = Util.absoluteSupport(minSupport, transactions.size)
+
     val spark = SparkSession.builder()
       .appName("YAFIM")
       .master("local[4]")
@@ -63,7 +65,7 @@ class YAFIM extends FIM {
       .flatMap(identity)
       .map(item => (item, 1))
       .reduceByKey(_ + _)
-      .filter(_._2 >= minSupport)
+      .filter(_._2 >= support)
       .map(_._1)
 
     val frequentItemsets = mutable.Map(1 -> singletonsRDD.map(List(_)).collect().toList)
@@ -73,7 +75,7 @@ class YAFIM extends FIM {
       k += 1
       val candidates = new Apriori().findKItemsets(frequentItemsets(k - 1))
       val candidatesBC = sc.broadcast(candidates)
-      val kFrequentItemsetsRDD = filterFrequentItemsets(candidatesBC, transactionsRDD, minSupport)
+      val kFrequentItemsetsRDD = filterFrequentItemsets(candidatesBC, transactionsRDD, support)
       if (!kFrequentItemsetsRDD.isEmpty()) {
         frequentItemsets.update(k, kFrequentItemsetsRDD.collect().toList)
       }

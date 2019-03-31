@@ -8,6 +8,10 @@ import scala.io.Source
 
 object Util {
 
+  def absoluteSupport(minSupport: Double, numTransactions: Int) = (numTransactions * minSupport + 0.5).toInt
+
+  def percentageSupport(minSupport: Int, numTransactions: Int) = minSupport / numTransactions.toDouble
+
   def parseTransactions(lines: List[String], separator: String): List[Itemset] = {
     lines.filter(l => !l.startsWith("#"))
       .filter(!_.trim.isEmpty)

@@ -19,15 +19,16 @@ object NaiveApriori {
 
 class NaiveApriori extends FIM {
 
-  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
-    val items = findSingletons(transactions, minSupport)
+  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
+    val support = Util.absoluteSupport(minSupport, transactions.size)
+    val items = findSingletons(transactions, support)
     val frequentItemsets = mutable.Map(1 -> items.map(i => List(i)))
 
     var k = 1
     while (frequentItemsets.get(k).nonEmpty) {
       k = k + 1
       val candidateKItemsets = findKItemsetsNaive(frequentItemsets(k - 1), k)
-      val frequents = filterFrequentItemsets(candidateKItemsets, transactions, minSupport)
+      val frequents = filterFrequentItemsets(candidateKItemsets, transactions, support)
       if (frequents.nonEmpty) {
         frequentItemsets.update(k, frequents)
       }

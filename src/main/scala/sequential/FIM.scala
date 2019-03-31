@@ -4,9 +4,9 @@ import sequential.Apriori.Itemset
 
 trait FIM {
 
-  def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset]
+  def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset]
 
-  def execute(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
+  def execute(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
     executionTime = 0
     if (t0 == 0)
       t0 = System.currentTimeMillis()
@@ -18,12 +18,12 @@ trait FIM {
     itemsets
   }
 
-  def execute(fileName: String, separator: String, minSupport: Int): List[Itemset] = {
+  def execute(fileName: String, separator: String, minSupport: Double): List[Itemset] = {
     t0 = System.currentTimeMillis()
     execute(Util.parseTransactions(fileName, separator), minSupport)
   }
 
-  def executeByText(transactions: String, minSupport: Int): List[Itemset] = {
+  def executeByText(transactions: String, minSupport: Double): List[Itemset] = {
     execute(Util.parseTransactionsByText(transactions), minSupport)
   }
 

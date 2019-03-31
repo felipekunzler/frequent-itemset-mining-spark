@@ -2,6 +2,7 @@ import FIMTest.assertItemsetsMatch
 import org.scalatest.FunSuite
 import org.scalatest.exceptions.TestFailedException
 import sequential.Apriori.Itemset
+import sequential.Util.percentageSupport
 import sequential._
 import sequential.fpgrowth.FPGrowth
 import spark.YAFIM
@@ -31,7 +32,7 @@ class FIMTest extends FunSuite {
            |c
         """.stripMargin
 
-      val frequentSets = fim.executeByText(itemsets, 3)
+      val frequentSets = fim.executeByText(itemsets, percentageSupport(3, 7))
       assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 
@@ -55,7 +56,7 @@ class FIMTest extends FunSuite {
           |1,2
         """.stripMargin
 
-      val frequentSets = fim.executeByText(itemsets, 3) // sup = (itemsets.size() * 0.4 + 0.5).toInt
+      val frequentSets = fim.executeByText(itemsets, percentageSupport(3, 7)) // sup = (itemsets.size() * 0.4 + 0.5).toInt
       assertItemsetsMatch(expectedItemsets, frequentSets, className)
     }
 

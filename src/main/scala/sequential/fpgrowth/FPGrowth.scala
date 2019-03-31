@@ -1,7 +1,7 @@
 package sequential.fpgrowth
 
 import sequential.Apriori.Itemset
-import sequential.FIM
+import sequential.{FIM, Util}
 import sequential.Util.printItemsets
 
 import scala.collection.mutable
@@ -32,12 +32,13 @@ object FPGrowth {
   */
 class FPGrowth extends FIM {
 
-  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Int): List[Itemset] = {
-    val singletons = mutable.LinkedHashMap(findSingletons(transactions, minSupport).map(i => i -> Option.empty[FPNode]): _*)
-    val fpTree = new FPTree(transactions, minSupport, singletons)
+  override def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
+    val support = Util.absoluteSupport(minSupport, transactions.size)
+    val singletons = mutable.LinkedHashMap(findSingletons(transactions, support).map(i => i -> Option.empty[FPNode]): _*)
+    val fpTree = new FPTree(transactions, support, singletons)
 
     singletons.keys.toList.reverse
-      .flatMap(s => findFrequentItemsets(fpTree, List(s), minSupport))
+      .flatMap(s => findFrequentItemsets(fpTree, List(s), support))
   }
 
   def findFrequentItemsets(fpTree: FPTree, prefix: List[String], minSupport: Int) : List[Itemset] = {
