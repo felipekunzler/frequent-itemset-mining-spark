@@ -34,7 +34,7 @@ object Apriori {
 
 }
 
-class Apriori extends FIM {
+class Apriori extends FIM with Serializable {
 
   def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
     val support = Util.absoluteSupport(minSupport, transactions.size)
@@ -58,7 +58,8 @@ class Apriori extends FIM {
     for (t <- transactions) {
       for ((itemset, count) <- map) {
         // Transactions contains all items from itemset
-        if (t.intersect(itemset).size == itemset.size) {
+        //if (t.intersect(itemset).size == itemset.size) {
+        if (candidateExistsInTransaction(itemset, t)) {
           map.update(itemset, count + 1)
         }
       }
@@ -101,7 +102,7 @@ class Apriori extends FIM {
     * the k-1 itemsets.
     * Do all subsets need to be checked or only those containing n-1 and n-2?
     */
-  private def isItemsetValid(itemset: List[String], previousItemsets: List[Itemset]): Boolean = {
+  def isItemsetValid(itemset: List[String], previousItemsets: List[Itemset]): Boolean = {
     for (i <- itemset.indices) {
       val subset = itemset.diff(List(itemset(i)))
       val found = previousItemsets.contains(subset)
@@ -112,7 +113,7 @@ class Apriori extends FIM {
     true
   }
 
-  private def allElementsEqualButLast(a: List[String], b: List[String]): Boolean = {
+  def allElementsEqualButLast(a: List[String], b: List[String]): Boolean = {
     for (i <- 0 until a.size - 1) {
       if (a(i) != b(i))
         return false
@@ -121,6 +122,16 @@ class Apriori extends FIM {
       return false
     }
     true
+  }
+
+  def candidateExistsInTransaction(candidate: Itemset, transaction: Itemset): Boolean = {
+    // all elements in candidate exist in transaction
+    var result = true
+    for (elem <- candidate) {
+      if (!transaction.contains(elem))
+        result = false
+    }
+    result
   }
 
   override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {

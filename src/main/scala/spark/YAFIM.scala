@@ -13,18 +13,8 @@ import scala.collection.mutable
 object YAFIM {
 
   def main(args: Array[String]): Unit = {
-    val transactions = Util.parseTransactionsByText(
-      """
-        |1,3
-        |1,2,3
-        |1
-        |1,3,4
-        |3
-        |1,2
-        |1,2,3,4
-      """.stripMargin)
-    val frequentItemsets = new YAFIM().execute(transactions, 3)
-    printItemsets(frequentItemsets)
+    val fim = new YAFIM
+    val frequentSets = fim.execute("/datasets/mushroom.txt", " ", 0.35)
   }
 
 }
@@ -46,13 +36,13 @@ object YAFIM {
 //  1. Implement Ct = subset(Ck, t). Candidates from transaction
 //  2. Piece YAFIM together
 //  3. Understand Hash Tree for sup counting. Why Hash Tree instead of a normal Tree?
-class YAFIM extends FIM {
+class YAFIM extends FIM with Serializable {
 
   override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
     val spark = SparkSession.builder()
       .appName("YAFIM")
-      .master("local[4]")
-      .config("spark.eventLog.enabled", "true")
+      .master("local[*]")
+      //.config("spark.eventLog.enabled", "true")
       .config("spark.driver.memory", "2g")
       .config("spark.executor.memory", "2g")
       .getOrCreate()
@@ -85,11 +75,31 @@ class YAFIM extends FIM {
       .map(_._1)
 
     val frequentItemsets = mutable.Map(1 -> singletonsRDD.map(List(_)).collect().toList)
+    val apriori = new Apriori with Serializable
 
     var k = 1
     while (frequentItemsets.get(k).nonEmpty) {
       k += 1
-      val candidates = new Apriori().findKItemsets(frequentItemsets(k - 1))
+
+      val previousFrequentSets = sc.parallelize(frequentItemsets(k - 1))
+
+      val cartesian = previousFrequentSets.cartesian(previousFrequentSets)
+        .filter { case (a, b) =>
+          a.mkString("") > b.mkString("")
+        }
+
+      val candidates = cartesian
+        .flatMap({ case (a, b) =>
+          var result: List[Itemset] = null
+          if (a.size == 1 || apriori.allElementsEqualButLast(a, b)) {
+            val newItemset = (a :+ b.last).sorted
+            if (apriori.isItemsetValid(newItemset, frequentItemsets(k - 1)))
+              result = List(newItemset)
+          }
+          if (result == null) List.empty[Itemset] else result
+        })
+        .collect().toList
+
       val candidatesBC = sc.broadcast(candidates)
       val kFrequentItemsetsRDD = filterFrequentItemsets(candidatesBC, transactionsRDD, support)
       if (!kFrequentItemsetsRDD.isEmpty()) {
@@ -102,10 +112,12 @@ class YAFIM extends FIM {
   }
 
   private def filterFrequentItemsets(candidates: Broadcast[List[Itemset]], transactionsRDD: RDD[Itemset], minSupport: Int) = {
+    val apriori = new Apriori with Serializable
     val filteredCandidatesRDD = transactionsRDD.flatMap(t => {
       candidates.value.flatMap(c => {
         // candidate exists within the transaction
-        if (c.intersect(t).length == c.length)
+        //if (c.intersect(t).length == c.length)
+        if (apriori.candidateExistsInTransaction(c, t))
           List(c)
         else
           List.empty[Itemset]
