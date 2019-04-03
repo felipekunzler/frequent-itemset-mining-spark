@@ -9,12 +9,12 @@ import scala.collection.mutable
 
 class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
 
-  private val fimInstances: Set[FIM] = Set(new FPGrowth(), new Apriori(), new YAFIM())
+  private val fimInstances: Set[FIM] = Set(new FPGrowth(), new YAFIM())
 
   private val executionTimes: mutable.ListBuffer[(String, String, Long)] = mutable.ListBuffer()
   private val resultsCache: mutable.Map[String, List[Itemset]] = mutable.Map()
 
-  Set(("mushroom.txt", 0.35), ("chess.txt", 0.85), ("pumsb_star.txt", 0.65), ("T10I4D100K.txt", 0.25)).foreach(t => {
+  Set(("mushroom.txt", 0.35), ("chess.txt", 0.85), ("pumsb_star.txt", 0.65), ("T10I4D100K.txt", 0.25)).take(1).foreach(t => {
     fimInstances.foreach(fim => {
       val className = fim.getClass.getSimpleName
       test(s"$className - ${t._1}") {
