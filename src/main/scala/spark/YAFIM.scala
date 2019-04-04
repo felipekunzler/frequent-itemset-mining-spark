@@ -33,10 +33,6 @@ object YAFIM {
 // manter opção 1 também
 // or, 2. generate all possible candidates of size n from T and check on the hash tree if exists and outputs it
 // 2 seems to be recommended.
-// TODO:
-//  1. Implement Ct = subset(Ck, t). Candidates from transaction
-//  2. Piece YAFIM together
-//  3. Understand Hash Tree for sup counting. Why Hash Tree instead of a normal Tree?
 class YAFIM extends FIM with Serializable {
 
   override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
@@ -44,8 +40,6 @@ class YAFIM extends FIM with Serializable {
       .appName("YAFIM")
       .master("local[4]")
       //.config("spark.eventLog.enabled", "true")
-      .config("spark.driver.memory", "2g")
-      .config("spark.executor.memory", "2g")
       .getOrCreate()
 
     val sc = spark.sparkContext
@@ -57,7 +51,9 @@ class YAFIM extends FIM with Serializable {
 
     if (!fileName.isEmpty) {
       // Fetch transaction
-      transactionsRDD = sc.textFile(getClass.getResource(fileName).getPath, 4)
+      //val file = List.fill(4)(getClass.getResource(fileName).getPath).mkString(",")
+      val file = getClass.getResource(fileName).getPath
+      transactionsRDD = sc.textFile(file, 8)
         .filter(!_.trim.isEmpty)
         .map(_.split(separator))
         .map(l => l.map(_.trim).toList)
