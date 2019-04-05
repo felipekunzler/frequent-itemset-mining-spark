@@ -10,12 +10,15 @@ object HashTree {
     val c = "1,4,5; 1,2,4; 4,5,7; 1,2,5; 4,5,8; 1,5,9; 1,3,6; 2,3,4; 5,6,7; 3,4,5; 3,5,6; 3,5,7; 6,8,9; 3,6,7; 3,6,8".replaceAll(";", "\n")
     val candidates = Util.parseTransactionsByText(c)
     val hashTree = new HashTree(candidates)
-    println(hashTree)
+    val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6"))
+    println("\nFound subsets: " + subsets)
   }
 }
 
+// TODO: Is only one hash tree shipped to each server?
 class HashTree(val candidates: List[Itemset]) {
 
+  /** How many levels the hash tree has */
   val size = candidates.head.size
   val rootNode = new Node(0)
 
@@ -61,10 +64,42 @@ class HashTree(val candidates: List[Itemset]) {
     }
   }
 
+  /**
+    * Finds all candidates in the hash tree that are a subset of the given transaction
+    */
+  def findCandidatesForTransaction(transaction: Itemset): ListBuffer[Itemset] = findCandidatesForTransaction(transaction, 0, rootNode)
+
+  private def findCandidatesForTransaction(transaction: Itemset, start: Int, currentNode: Node): ListBuffer[Itemset] = {
+    val foundCandidates = new ListBuffer[Itemset]()
+
+    for (i <- start until Math.min(transaction.size, start + size)) { // Iterate at most <size> times.
+      val item = transaction(i)
+      val nextNode = findNextNode(item, currentNode)
+      if (nextNode.candidatesBucket.nonEmpty) {
+        val matchingCandidates = nextNode.candidatesBucket.filter(c => apriori.candidateExistsInTransaction(c, transaction))
+        foundCandidates.appendAll(matchingCandidates)
+        println(s"Found bucket. item $item, ${nextNode.candidatesBucket}")
+      }
+      else {
+        val nextCandidates = findCandidatesForTransaction(transaction, i + 1, nextNode)
+        foundCandidates.appendAll(nextCandidates)
+      }
+    }
+    foundCandidates
+  }
+
+  val apriori = new Apriori()
+
+  def findNextNode(item: String, currentNode: Node): Node = {
+    var position = item.hashCode % size
+    if (position == 0) position = size
+    currentNode.children(position)
+  }
+
   class Node(val level: Int) {
 
     val children = mutable.Map[Int, Node]()
-    val candidatesBucket = ListBuffer[Itemset]()
+    val candidatesBucket = new ListBuffer[Itemset]()
 
   }
 
