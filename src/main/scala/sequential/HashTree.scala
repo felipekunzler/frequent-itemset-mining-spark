@@ -7,11 +7,12 @@ import scala.collection.mutable.ListBuffer
 
 object HashTree {
   def main(args: Array[String]): Unit = {
-    val c = "1,4,5; 1,2,4; 4,5,7; 1,2,5; 4,5,8; 1,5,9; 1,3,6; 2,3,4; 5,6,7; 3,4,5; 3,5,6; 3,5,7; 6,8,9; 3,6,7; 3,6,8".replaceAll(";", "\n")
+    //val c = "1,4,5; 1,2,4; 4,5,7; 1,2,5; 4,5,8; 1,5,9; 1,3,6; 2,3,4; 5,6,7; 3,4,5; 3,5,6; 3,5,7; 6,8,9; 3,6,7; 3,6,8".replaceAll(";", "\n")
+    val c = "1,5; 1,3; 1,7".replaceAll(";", "\n")
     val candidates = Util.parseTransactionsByText(c)
     val hashTree = new HashTree(candidates)
-    val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6", "9"))
-    println("\nFound subsets: " + subsets)
+    //val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6", "9"))
+    //println("\nFound subsets: " + subsets)
   }
 }
 
@@ -32,7 +33,7 @@ class HashTree(val candidates: List[Itemset]) {
       // go to the next tree level
       putCandidate(candidate, nextNode)
     }
-    else if (nextNode.candidatesBucket.size < size) {
+    else if (nextNode.candidatesBucket.size < size || currentNode.level >= size - 1) {
       // put into the bucket
       nextNode.candidatesBucket.append(candidate)
     }
@@ -54,6 +55,7 @@ class HashTree(val candidates: List[Itemset]) {
     val item = candidate(currentNode.level)
     var position = item.hashCode % size
     if (position == 0) position = size
+    //println(s"item: $item; position $position")
     if (currentNode.children.contains(position)) {
       currentNode.children(position)
     }
@@ -80,7 +82,7 @@ class HashTree(val candidates: List[Itemset]) {
     for (i <- start until Math.min(transaction.size, start + size)) { // Iterate at most <size> times.
       val item = transaction(i)
       val nextNode = findNextNode(item, currentNode)
-      if (nextNode != null) {
+      if (nextNode != null) { // node may not exist for a given transaction
         if (nextNode.candidatesBucket.nonEmpty) {
           //val matchingCandidates = nextNode.candidatesBucket.filter(c => apriori.candidateExistsInTransaction(c, transaction))
           foundCandidates.append(nextNode)
