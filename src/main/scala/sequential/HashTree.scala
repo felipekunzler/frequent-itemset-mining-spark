@@ -10,7 +10,7 @@ object HashTree {
     val c = "1,4,5; 1,2,4; 4,5,7; 1,2,5; 4,5,8; 1,5,9; 1,3,6; 2,3,4; 5,6,7; 3,4,5; 3,5,6; 3,5,7; 6,8,9; 3,6,7; 3,6,8".replaceAll(";", "\n")
     val candidates = Util.parseTransactionsByText(c)
     val hashTree = new HashTree(candidates)
-    val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6"))
+    val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6", "9"))
     println("\nFound subsets: " + subsets)
   }
 }
@@ -19,7 +19,7 @@ object HashTree {
 class HashTree(val candidates: List[Itemset]) {
 
   /** How many levels the hash tree has */
-  val size = candidates.head.size
+  val size = if (candidates.nonEmpty) candidates.head.size else 0
   val rootNode = new Node(0)
 
   for (candidate <- candidates) {
@@ -67,22 +67,29 @@ class HashTree(val candidates: List[Itemset]) {
   /**
     * Finds all candidates in the hash tree that are a subset of the given transaction
     */
-  def findCandidatesForTransaction(transaction: Itemset): ListBuffer[Itemset] = findCandidatesForTransaction(transaction, 0, rootNode)
+  def findCandidatesForTransaction(transaction: Itemset): ListBuffer[Itemset] = {
+    findCandidatesForTransaction(transaction, 0, rootNode)
+      .distinct
+      .flatMap(_.candidatesBucket)
+      .filter(apriori.candidateExistsInTransaction(_, transaction))
+  }
 
-  private def findCandidatesForTransaction(transaction: Itemset, start: Int, currentNode: Node): ListBuffer[Itemset] = {
-    val foundCandidates = new ListBuffer[Itemset]()
+  private def findCandidatesForTransaction(transaction: Itemset, start: Int, currentNode: Node): ListBuffer[Node] = {
+    val foundCandidates = new ListBuffer[Node]()
 
     for (i <- start until Math.min(transaction.size, start + size)) { // Iterate at most <size> times.
       val item = transaction(i)
       val nextNode = findNextNode(item, currentNode)
-      if (nextNode.candidatesBucket.nonEmpty) {
-        val matchingCandidates = nextNode.candidatesBucket.filter(c => apriori.candidateExistsInTransaction(c, transaction))
-        foundCandidates.appendAll(matchingCandidates)
-        println(s"Found bucket. item $item, ${nextNode.candidatesBucket}")
-      }
-      else {
-        val nextCandidates = findCandidatesForTransaction(transaction, i + 1, nextNode)
-        foundCandidates.appendAll(nextCandidates)
+      if (nextNode != null) {
+        if (nextNode.candidatesBucket.nonEmpty) {
+          //val matchingCandidates = nextNode.candidatesBucket.filter(c => apriori.candidateExistsInTransaction(c, transaction))
+          foundCandidates.append(nextNode)
+          //println(s"Found bucket. item $item, ${nextNode.candidatesBucket}")
+        }
+        else {
+          val nextCandidates = findCandidatesForTransaction(transaction, i + 1, nextNode)
+          foundCandidates.appendAll(nextCandidates)
+        }
       }
     }
     foundCandidates
@@ -93,7 +100,10 @@ class HashTree(val candidates: List[Itemset]) {
   def findNextNode(item: String, currentNode: Node): Node = {
     var position = item.hashCode % size
     if (position == 0) position = size
-    currentNode.children(position)
+    if (currentNode.children.contains(position))
+      currentNode.children(position)
+    else
+      null
   }
 
   class Node(val level: Int) {

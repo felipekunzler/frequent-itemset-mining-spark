@@ -9,7 +9,7 @@ import spark.YAFIM
 
 class FIMTest extends FunSuite {
 
-  private val fimInstances: Set[FIM] = Set(new NaiveFIM(), new NaiveApriori(), new Apriori(), new FPGrowth(), new YAFIM())
+  private val fimInstances: Set[FIM] = Set(new NaiveFIM, new NaiveApriori, new Apriori, new FPGrowth, new YAFIM, new AprioriHashTree)
   private val sourceOfTruth = new FPGrowth()
 
   fimInstances.foreach(fim => {
