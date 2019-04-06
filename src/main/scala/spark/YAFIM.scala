@@ -55,7 +55,7 @@ class YAFIM extends FIM with Serializable {
       val file = getClass.getResource(fileName).getPath
       transactionsRDD = sc.textFile(file, 8)
         .filter(!_.trim.isEmpty)
-        .map(_.split(separator))
+        .map(_.split(separator + "+"))
         .map(l => l.map(_.trim).toList)
         .cache()
       support = absoluteSupport(minSupport, transactionsRDD.count().toInt)

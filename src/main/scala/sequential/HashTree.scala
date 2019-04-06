@@ -7,20 +7,23 @@ import scala.collection.mutable.ListBuffer
 
 object HashTree {
   def main(args: Array[String]): Unit = {
-    //val c = "1,4,5; 1,2,4; 4,5,7; 1,2,5; 4,5,8; 1,5,9; 1,3,6; 2,3,4; 5,6,7; 3,4,5; 3,5,6; 3,5,7; 6,8,9; 3,6,7; 3,6,8".replaceAll(";", "\n")
-    val c = "1,5; 1,3; 1,7".replaceAll(";", "\n")
+    val c = "1,4,5; 1,2,4; 4,5,7; 1,2,5; 4,5,8; 1,5,9; 1,3,6; 2,3,4; 5,6,7; 3,4,5; 3,5,6; 3,5,7; 6,8,9; 3,6,7; 3,6,8".replaceAll(";", "\n")
+    //val c = "1,5; 1,3; 1,7".replaceAll(";", "\n")
     val candidates = Util.parseTransactionsByText(c)
     val hashTree = new HashTree(candidates)
-    //val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6", "9"))
-    //println("\nFound subsets: " + subsets)
+    val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6"))
+    println("\nFound subsets: " + subsets)
   }
 }
 
 // TODO: Is only one hash tree shipped to each server?
+// TODO: Built tree of size 3 and rows 24 in 0 -> Searched all tree in 85 [Something went wrong here]
+// TODO: Check ratio of buckets and hit buckets too
+
 class HashTree(val candidates: List[Itemset]) {
 
   /** How many levels the hash tree has */
-  val size = if (candidates.nonEmpty) candidates.head.size else 0
+  val size = candidates.head.size
   val rootNode = new Node(0)
 
   for (candidate <- candidates) {
@@ -79,14 +82,14 @@ class HashTree(val candidates: List[Itemset]) {
   private def findCandidatesForTransaction(transaction: Itemset, start: Int, currentNode: Node): ListBuffer[Node] = {
     val foundCandidates = new ListBuffer[Node]()
 
-    for (i <- start until Math.min(transaction.size, start + size)) { // Iterate at most <size> times.
+    for (i <- start until Math.min(transaction.size, transaction.size - size + currentNode.level + 1)) { // Iterate at most <size> times. Not actually true. But doesn't seem to be entire dataset either, maybe stop if reach all?
       val item = transaction(i)
       val nextNode = findNextNode(item, currentNode)
       if (nextNode != null) { // node may not exist for a given transaction
         if (nextNode.candidatesBucket.nonEmpty) {
           //val matchingCandidates = nextNode.candidatesBucket.filter(c => apriori.candidateExistsInTransaction(c, transaction))
           foundCandidates.append(nextNode)
-          //println(s"Found bucket. item $item, ${nextNode.candidatesBucket}")
+          println(s"Found bucket. item $item, ${nextNode.candidatesBucket}")
         }
         else {
           val nextCandidates = findCandidatesForTransaction(transaction, i + 1, nextNode)

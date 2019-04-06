@@ -15,7 +15,7 @@ object Util {
   def parseTransactions(lines: List[String], separator: String): List[Itemset] = {
     lines.filter(l => !l.startsWith("#"))
       .filter(!_.trim.isEmpty)
-      .map(l => l.split(separator))
+      .map(l => l.split(separator + "+"))
       .map(l => l.map(item => item.trim).toList)
   }
 
