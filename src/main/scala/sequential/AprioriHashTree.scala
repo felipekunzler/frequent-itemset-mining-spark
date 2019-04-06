@@ -26,15 +26,15 @@ class AprioriHashTree extends Apriori {
       val hashTree = new HashTree(possibleItemsets)
       println(s"Built tree of size ${possibleItemsets.head.size} and rows ${possibleItemsets.size} in ${(System.currentTimeMillis() - t0) / 1000}")
       val t1 = System.currentTimeMillis()
-      val r = transactions.flatMap(t => hashTree.findCandidatesForTransaction(t.sorted))
-      println(s"Searched tree in ${(System.currentTimeMillis() - t1) / 1000}")
+      val subsets = transactions.flatMap(t => t.sorted.combinations(possibleItemsets.head.size))
+      println(s"Generated ${subsets.size} subsets in ${(System.currentTimeMillis() - t1) / 1000}")
+
       val t2 = System.currentTimeMillis()
-      val r2 = r.groupBy(identity)
-        .map(t => (t._1, t._2.size))
-        .filter(_._2 >= minSupport)
-        .keys.toList
-      println(s"Grouped an filtered in ${(System.currentTimeMillis() - t2) / 1000}\n")
-      r2
+      subsets.foreach(s => hashTree.incrementCandidatesForSubset(s))
+      println(s"Searched tree in ${(System.currentTimeMillis() - t2) / 1000}\n")
+
+      val r = hashTree.findFrequents(minSupport)
+      r.toList
     }
     else
       List.empty[Itemset]
