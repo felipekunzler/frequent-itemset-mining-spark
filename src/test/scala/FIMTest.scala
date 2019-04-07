@@ -5,6 +5,7 @@ import sequential.Apriori.Itemset
 import sequential.Util.percentageSupport
 import sequential._
 import sequential.fpgrowth.FPGrowth
+import sequential.hashtree.AprioriHashTree
 import spark.YAFIM
 
 class FIMTest extends FunSuite {

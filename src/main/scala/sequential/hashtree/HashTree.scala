@@ -1,6 +1,7 @@
-package sequential
+package sequential.hashtree
 
 import sequential.Apriori.Itemset
+import sequential.{Apriori, Util}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -11,8 +12,8 @@ object HashTree {
     //val c = "1,5; 1,3; 1,7".replaceAll(";", "\n")
     val candidates = Util.parseTransactionsByText(c)
     val hashTree = new HashTree(candidates)
-    //val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6"))
-    //println("\nFound subsets: " + subsets)
+    val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6"))
+    println("\nFound subsets: " + subsets)
   }
 }
 
@@ -38,12 +39,12 @@ class HashTree(val candidates: List[Itemset]) {
     }
     else if (nextNode.candidatesBucket.size < size || currentNode.level >= size - 1) {
       // put into the bucket
-      nextNode.candidatesBucket.append(new Pair(candidate, 0))
+      nextNode.candidatesBucket.append(candidate)
     }
     else {
       // bucket size exceeded, break into children nodes
       for (elem <- nextNode.candidatesBucket) {
-        putCandidate(elem.candidate, nextNode)
+        putCandidate(elem, nextNode)
       }
       putCandidate(candidate, nextNode)
       nextNode.candidatesBucket.clear()
@@ -69,40 +70,35 @@ class HashTree(val candidates: List[Itemset]) {
     }
   }
 
-  def findFrequents(minSupport: Int) ={
-    val frequents = mutable.ListBuffer[Itemset]()
-    frequentCandidates(rootNode, frequents, minSupport)
-    frequents
+  /**
+    * Finds all candidates in the hash tree that are a subset of the given transaction
+    */
+  def findCandidatesForTransaction(transaction: Itemset): ListBuffer[Itemset] = {
+    findCandidatesForTransaction(transaction, 0, rootNode)
+      .distinct
+      .flatMap(_.candidatesBucket)
+      .filter(apriori.candidateExistsInTransaction(_, transaction))
   }
 
-  def frequentCandidates(node: Node, frequents: mutable.ListBuffer[Itemset], minSupport: Int): Unit = {
-    if (node.candidatesBucket.nonEmpty) {
-      for (pair <- node.candidatesBucket) {
-        if (pair.count >= minSupport) {
-          frequents.append(pair.candidate)
-        }
-      }
-    } else {
-      for (n <- node.children) {
-        frequentCandidates(n._2, frequents, minSupport)
-      }
-    }
-  }
+  private def findCandidatesForTransaction(transaction: Itemset, start: Int, currentNode: Node): ListBuffer[Node] = {
+    val foundCandidates = new ListBuffer[Node]()
 
-  def incrementCandidatesForSubset(subset: Itemset, node: Node = rootNode): Unit = {
-    if (node != null) { // node may not exist for a given transaction
-      if (node.candidatesBucket.nonEmpty) {
-        for (pair <- node.candidatesBucket) {
-          if (apriori.candidateExistsInTransaction(pair.candidate, subset))
-            pair.count += 1
+    for (i <- start until Math.min(transaction.size, transaction.size - size + currentNode.level + 1)) { // Iterate at most <size> times. Not actually true. But doesn't seem to be entire dataset either, maybe stop if reach all?
+      val item = transaction(i)
+      val nextNode = findNextNode(item, currentNode)
+      if (nextNode != null) { // node may not exist for a given transaction
+        if (nextNode.candidatesBucket.nonEmpty) {
+          //val matchingCandidates = nextNode.candidatesBucket.filter(c => apriori.candidateExistsInTransaction(c, transaction))
+          foundCandidates.append(nextNode)
+          //println(s"Found bucket. item $item, ${nextNode.candidatesBucket}")
         }
-      } else {
-        val level = node.level
-        val item = subset(level)
-        val nextNode = findNextNode(item, node)
-        incrementCandidatesForSubset(subset, nextNode)
+        else {
+          val nextCandidates = findCandidatesForTransaction(transaction, i + 1, nextNode)
+          foundCandidates.appendAll(nextCandidates)
+        }
       }
     }
+    foundCandidates
   }
 
   val apriori = new Apriori()
@@ -119,11 +115,9 @@ class HashTree(val candidates: List[Itemset]) {
   class Node(val level: Int) {
 
     val children = mutable.Map[Int, Node]()
-    val candidatesBucket = mutable.ListBuffer[Pair]()
+    val candidatesBucket = new ListBuffer[Itemset]()
 
   }
-
-  class Pair(val candidate: Itemset, var count: Int = 0)
 
 }
 
