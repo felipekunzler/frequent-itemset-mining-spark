@@ -24,12 +24,14 @@ class AprioriHashTree extends Apriori {
 
   override def filterFrequentItemsets(possibleItemsets: List[Itemset], transactions: List[Itemset], minSupport: Int): List[Itemset] = {
     if (possibleItemsets.nonEmpty) {
+      val items = possibleItemsets.flatten.distinct
+
       val t0 = System.currentTimeMillis()
-      val hashTree = new HashTree(possibleItemsets)
+      val hashTree = new HashTree(possibleItemsets, items)
       println(s"Built tree of size ${possibleItemsets.head.size} and rows ${possibleItemsets.size} in ${(System.currentTimeMillis() - t0) / 1000}")
       val t1 = System.currentTimeMillis()
       // Maybe pruninig the transaction using the previous frequents?
-      val r = transactions.flatMap(t => hashTree.findCandidatesForTransaction(t.filter(i => singletons.contains(i)).sorted))
+      val r = transactions.flatMap(t => hashTree.findCandidatesForTransaction(t.filter(i => items.contains(i)).sorted))
       println(s"Searched tree in ${(System.currentTimeMillis() - t1) / 1000}")
       val t2 = System.currentTimeMillis()
       val r2 = r.groupBy(identity)

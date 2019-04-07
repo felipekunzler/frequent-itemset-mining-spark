@@ -11,7 +11,7 @@ object HashTree {
     val c = "1,4,5; 1,2,4; 4,5,7; 1,2,5; 4,5,8; 1,5,9; 1,3,6; 2,3,4; 5,6,7; 3,4,5; 3,5,6; 3,5,7; 6,8,9; 3,6,7; 3,6,8".replaceAll(";", "\n")
     //val c = "1,5; 1,3; 1,7".replaceAll(";", "\n")
     val candidates = Util.parseTransactionsByText(c)
-    val hashTree = new HashTree(candidates)
+    val hashTree = new HashTree(candidates, List())
     val subsets = hashTree.findCandidatesForTransaction(List("1", "2", "3", "5", "6"))
     println("\nFound subsets: " + subsets)
   }
@@ -20,12 +20,25 @@ object HashTree {
 // TODO: Is only one hash tree shipped to each server?
 // TODO: Built tree of size 3 and rows 24 in 0 -> Searched all tree in 85 [Something went wrong here]
 // TODO: Check ratio of buckets and hit buckets too
-
-class HashTree(val candidates: List[Itemset]) {
+/**
+  * Stones in the way:
+  * - Duplicated visits, return node and then distinct
+  * - Always linear hash tree (actual issue? try removing fix)
+  * - Needed to sort transaction
+  * - Reduce number of visited children (start to transaction.size - size + level + 1)
+  * - Hash function should distribute possible items evenly. (2x speed)
+  * - Prune transaction before traversing the hash tree (according to the generated transactions (last frequents may also work))
+  */
+class HashTree(val candidates: List[Itemset], val items: List[String]) {
 
   /** How many levels the hash tree has */
   val size = candidates.head.size
   val rootNode = new Node(0)
+
+  val hashes = mutable.Map[String, Int]()
+  for (i <- items.indices) {
+    hashes.update(items(i), i)
+  }
 
   for (candidate <- candidates) {
     putCandidate(candidate, rootNode)
@@ -57,8 +70,7 @@ class HashTree(val candidates: List[Itemset]) {
     */
   private def getNextNode(candidate: Itemset, currentNode: Node): Node = {
     val item = candidate(currentNode.level)
-    var position = item.hashCode % size
-    if (position == 0) position = size
+    val position = hash(item)
     //println(s"item: $item; position $position")
     if (currentNode.children.contains(position)) {
       currentNode.children(position)
@@ -104,12 +116,15 @@ class HashTree(val candidates: List[Itemset]) {
   val apriori = new Apriori()
 
   def findNextNode(item: String, currentNode: Node): Node = {
-    var position = item.hashCode % size
-    if (position == 0) position = size
+    val position = hash(item)
     if (currentNode.children.contains(position))
       currentNode.children(position)
     else
       null
+  }
+
+  def hash(item: String): Int = {
+    hashes(item)
   }
 
   class Node(val level: Int) {
