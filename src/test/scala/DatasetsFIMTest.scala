@@ -3,14 +3,14 @@ import org.scalatest.{BeforeAndAfterAll, FunSuite}
 import sequential.Apriori.Itemset
 import sequential._
 import sequential.fpgrowth.FPGrowth
-import sequential.hashtree.AprioriHashTree
+import sequential.hashtree.{AprioriHashTree, AprioriHashTreeSubsets}
 import spark.YAFIM
 
 import scala.collection.mutable
 
 class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
 
-  private val fimInstances: Set[FIM] = Set(new Apriori, new AprioriHashTree)
+  private val fimInstances: Set[FIM] = Set(new Apriori, new AprioriHashTree, new AprioriHashTreeSubsets)
 
   private val executionTimes: mutable.ListBuffer[(String, String, Long)] = mutable.ListBuffer()
   private val resultsCache: mutable.Map[String, List[Itemset]] = mutable.Map()

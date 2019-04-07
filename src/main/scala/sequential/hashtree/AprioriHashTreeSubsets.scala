@@ -12,7 +12,8 @@ class AprioriHashTreeSubsets extends Apriori {
       val hashTree = new HashTreeSubsets(possibleItemsets)
       println(s"Built tree of size ${possibleItemsets.head.size} and rows ${possibleItemsets.size} in ${(System.currentTimeMillis() - t0) / 1000}")
       val t1 = System.currentTimeMillis()
-      val subsets = transactions.flatMap(t => t.sorted.combinations(possibleItemsets.head.size))
+      // maybe generate subsets using the latest frequent itemsets?
+      val subsets = transactions.flatMap(t => t.filter(i => singletons.contains(i)).sorted.combinations(possibleItemsets.head.size))
       println(s"Generated ${subsets.size} subsets in ${(System.currentTimeMillis() - t1) / 1000}")
 
       val t2 = System.currentTimeMillis()
