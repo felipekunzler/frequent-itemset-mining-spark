@@ -29,7 +29,7 @@ object HashTree {
   * - Hash function should distribute possible items evenly. (2x speed)
   * - Prune transaction before traversing the hash tree (according to the generated transactions (last frequents may also work))
   */
-class HashTree(val candidates: List[Itemset], val items: List[String]) {
+class HashTree(val candidates: List[Itemset], val items: List[String]) extends Serializable {
 
   /** How many levels the hash tree has */
   val size = candidates.head.size
@@ -127,7 +127,7 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) {
     hashes(item)
   }
 
-  class Node(val level: Int) {
+  class Node(val level: Int) extends Serializable {
 
     val children = mutable.Map[Int, Node]()
     val candidatesBucket = new ListBuffer[Itemset]()

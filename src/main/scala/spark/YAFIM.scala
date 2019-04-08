@@ -81,10 +81,9 @@ class YAFIM extends FIM with Serializable {
 
       // Candidate generation and initial pruning
       val candidates = candidateGeneration(frequentItemsets(k - 1), sc)
-      val candidatesBC = sc.broadcast(candidates)
 
       // Final filter by checking with all transactions
-      val kFrequentItemsetsRDD = filterFrequentItemsets(candidatesBC, transactionsRDD, support)
+      val kFrequentItemsetsRDD = filterFrequentItemsets(candidates, transactionsRDD, support, sc)
       if (!kFrequentItemsetsRDD.isEmpty()) {
         frequentItemsets.update(k, kFrequentItemsetsRDD.collect().toList)
       }
@@ -115,10 +114,11 @@ class YAFIM extends FIM with Serializable {
       .collect().toList
   }
 
-  private def filterFrequentItemsets(candidates: Broadcast[List[Itemset]], transactionsRDD: RDD[Itemset], minSupport: Int) = {
+  def filterFrequentItemsets(candidates: List[Itemset], transactionsRDD: RDD[Itemset], minSupport: Int, sc: SparkContext) = {
     val apriori = new Apriori with Serializable
+    val candidatesBC = sc.broadcast(candidates)
     val filteredCandidatesRDD = transactionsRDD.flatMap(t => {
-      candidates.value.flatMap(c => {
+      candidatesBC.value.flatMap(c => {
         // candidate exists within the transaction
         //if (c.intersect(t).length == c.length)
         if (apriori.candidateExistsInTransaction(c, t))
