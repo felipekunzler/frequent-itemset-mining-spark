@@ -39,9 +39,9 @@ class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutab
     }
   }
 
-  /**
-    * Todo: Currently contains infrequent items (say b:2 for sup 3)
-    * Todo: Support prefix with size > 1. Not really needed, only pass the next prefix.
+  /*
+    * TODO: Currently contains infrequent items (say b:2 for sup 3)
+    * TODO: Support prefix with size > 1. Not really needed, only pass the next prefix.
     */
   def conditionalTreeForPrefix(prefix: String, minSupport: Int): FPTree = {
     val conditionalPatternBase = mutable.ListBuffer[Itemset]()
@@ -55,6 +55,8 @@ class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutab
         itemset.insert(0, node.item)
         node = node.parent
       }
+      // TODO: Maybe a hash map with cp and count to prevent duplicates?
+      // TODO: Use min support to prune non frequent items somehow, either here or while building the FPTree
       for (_ <- 0 until prefixSupport) {
         conditionalPatternBase.append(itemset.toList)
       }

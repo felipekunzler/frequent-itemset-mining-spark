@@ -26,7 +26,7 @@ object FPGrowth {
 
 /**
   * 1. Find singletons, order by most frequent
-  * 2. Build FP-Tree by creating all possible paths (TODO: Links between items)
+  * 2. Build FP-Tree by creating all possible paths
   * 3. For each singleton, find a list of conditional pattern base
   * 4. Build the conditional FP-Tree
   */
@@ -58,12 +58,12 @@ class FPGrowth extends FIM {
     * Prefix: {d} => Out: {da, db, dc}
     * Prefix: {dc} => Out: {dca, dcb}
     */
-  private def generatePrefixes(prefix: List[String], header: scala.collection.Set[String]): List[List[String]] = {
+   def generatePrefixes(prefix: List[String], header: scala.collection.Set[String]): List[List[String]] = {
     header.filter(i => !prefix.contains(i))
       .map(i => i +: prefix).toList
   }
 
-  private def findSingletons(transactions: List[Itemset], minSupport: Int) = {
+  def findSingletons(transactions: List[Itemset], minSupport: Int) = {
     transactions.flatten
       .groupBy(identity)
       .map(t => (t._1, t._2.size))

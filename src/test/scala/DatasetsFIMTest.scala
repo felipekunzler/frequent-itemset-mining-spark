@@ -10,7 +10,7 @@ import scala.collection.mutable
 
 class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
 
-  private val fimInstances: List[FIM] = List(new FPGrowth, new Apriori, new AprioriHashTree, new YAFIM, new YAFIMHashTree)
+  private val fimInstances: List[FIM] = List(new FPGrowth, new Apriori, new AprioriHashTree, new YAFIM, new YAFIMHashTree, new DFPS)
 
   private val executionTimes: mutable.ListBuffer[(String, String, Long)] = mutable.ListBuffer()
   private val resultsCache: mutable.Map[String, List[Itemset]] = mutable.Map()

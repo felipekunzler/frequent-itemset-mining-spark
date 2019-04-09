@@ -4,6 +4,7 @@ import org.apache.spark.rdd.RDD
 import sequential.Apriori.Itemset
 import sequential.hashtree.HashTree
 
+// TODO: cache pruned transactionsRDDs?
 class YAFIMHashTree extends YAFIM {
 
   override def filterFrequentItemsets(candidates: List[Itemset], transactionsRDD: RDD[Itemset], minSupport: Int, sc: SparkContext): RDD[Itemset] = {
