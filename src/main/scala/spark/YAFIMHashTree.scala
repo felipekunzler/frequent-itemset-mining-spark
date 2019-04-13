@@ -21,7 +21,7 @@ class YAFIMHashTree extends YAFIM {
         .filter(_._2 >= minSupport)
         .map(_._1)
         .collect().toList
-      println(s"Searched tree in ${(System.currentTimeMillis() - t1) / 1000}.")
+      println(s"Searched tree in ${(System.currentTimeMillis() - t1) / 1000}s.")
       r
     }
     else List.empty[Itemset]

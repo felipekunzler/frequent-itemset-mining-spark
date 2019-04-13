@@ -25,6 +25,9 @@ object HashTree {
   * - Reduce number of visited children (start to transaction.size - size + level + 1)
   * - Hash function should distribute possible items evenly. (2x speed)
   * - Prune transaction before traversing the hash tree (according to the generated transactions (last frequents may also work))
+  *
+  * Notes:
+  * - Proper hash tree on k=2 is very slow, only two levels and 4 buckets, that's why the "wrong" way is much better
   */
 class HashTree(val candidates: List[Itemset], val items: List[String]) extends Serializable {
 
@@ -37,13 +40,13 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   // todo: would group by ratio help?
   val hashes = mutable.Map[String, Int]()
   for (i <- items.indices) {
-    hashes.update(items(i), i)
+    hashes.update(items(i), i) // i % size
   }
 
   for (candidate <- candidates) {
     putCandidate(candidate, rootNode)
   }
-  println(s"Built tree of size ${size} and rows ${candidates.size} in ${(System.currentTimeMillis() - t0) / 1000}")
+  println(s"Built tree of size $size and rows ${candidates.size} in ${(System.currentTimeMillis() - t0) / 1000}s.")
 
   private def putCandidate(candidate: Itemset, currentNode: Node): Unit = {
     val nextNode = getNextNode(candidate, currentNode)
