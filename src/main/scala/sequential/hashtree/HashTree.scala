@@ -32,6 +32,7 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   val size = candidates.head.size
   val rootNode = new Node(0)
 
+  val t0 = System.currentTimeMillis()
   // todo: group items in hash function
   // todo: would group by ratio help?
   val hashes = mutable.Map[String, Int]()
@@ -42,6 +43,7 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   for (candidate <- candidates) {
     putCandidate(candidate, rootNode)
   }
+  println(s"Built tree of size ${size} and rows ${candidates.size} in ${(System.currentTimeMillis() - t0) / 1000}")
 
   private def putCandidate(candidate: Itemset, currentNode: Node): Unit = {
     val nextNode = getNextNode(candidate, currentNode)

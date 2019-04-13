@@ -20,6 +20,9 @@ object YAFIM {
   * YAFIM (Yet Another Frequent Itemset Mining) algorithm implementation.
   * 1. Generate singletons
   * 2. Find K+1 frequent itemsets
+  *
+  * Notes:
+  * rdd.isEmpty() would recalculate whole rdd twice after collect()
   */
 class YAFIM extends SparkFIM with Serializable {
 
@@ -35,9 +38,9 @@ class YAFIM extends SparkFIM with Serializable {
       val candidates = candidateGeneration(frequentItemsets(k - 1), sc)
 
       // Final filter by checking with all transactions
-      val kFrequentItemsetsRDD = filterFrequentItemsets(candidates, transactions, minSupport, sc)
-      if (!kFrequentItemsetsRDD.isEmpty()) {
-        frequentItemsets.update(k, kFrequentItemsetsRDD.collect().toList)
+      val kFrequentItemsets = filterFrequentItemsets(candidates, transactions, minSupport, sc)
+      if (!kFrequentItemsets.isEmpty) {
+        frequentItemsets.update(k, kFrequentItemsets)
       }
     }
     frequentItemsets.values.flatten.toList
@@ -82,6 +85,7 @@ class YAFIM extends SparkFIM with Serializable {
       .reduceByKey(_ + _)
       .filter(_._2 >= minSupport)
       .map(_._1)
+      .collect().toList
   }
 
 }

@@ -30,7 +30,6 @@ object FPGrowth {
   * 3. For each singleton, find a list of conditional pattern base
   * 4. Build the conditional FP-Tree
   */
-// TODO: Possible problem with ("mushroom.txt", 0.35) and "" as separator
 class FPGrowth extends FIM {
 
   def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
