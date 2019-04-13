@@ -1,24 +1,26 @@
 package spark
 
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import sequential.Apriori.Itemset
-import sequential.FIM
-import sequential.Util.absoluteSupport
 import sequential.fpgrowth.{FPGrowth, FPNode, FPTree}
 
 import scala.collection.mutable
 
-// TODO: SparkFIM which passes transactionRDD, singletons, support and times execution
-class DFPS extends FIM with Serializable {
+class DFPS extends SparkFIM with Serializable {
 
-  def dfps(transactionsRDD: RDD[Itemset], singletons: Seq[String], minSupport: Int, spark: SparkSession) = {
-    transactionsRDD
-      .map(t => pruneAndSort(t, singletons))
+  override def findFrequentItemsets(transactions: RDD[Itemset], singletons: RDD[(String, Int)], minSupport: Int,
+                                    spark: SparkSession, sc: SparkContext): List[Itemset] = {
+    // Generate singletons
+    val sortedSingletons = singletons.collect.map(t => t._1)
+
+    transactions
+      .map(t => pruneAndSort(t, sortedSingletons))
       .flatMap(buildConditionalPatternsBase)
-      .groupByKey(singletons.size - 1)
+      .groupByKey(sortedSingletons.length - 1)
       .flatMap(t => minePatternFragment(t._1, t._2.toList, minSupport))
-      .collect().toList ++ singletons.map(List(_))
+      .collect().toList ++ sortedSingletons.map(List(_))
   }
 
   def minePatternFragment(prefix: String, conditionalPatterns: List[Itemset], minSupport: Int) = {
@@ -46,50 +48,6 @@ class DFPS extends FIM with Serializable {
     transaction
       .filter(i => singletons.contains(i))
       .sortWith((a, b) => singletons.indexOf(a) < singletons.indexOf(b))
-  }
-
-  override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
-    val spark = SparkSession.builder()
-      .appName("DFPS")
-      .master("local[4]")
-      //.config("spark.eventLog.enabled", "true")
-      .getOrCreate()
-
-    val sc = spark.sparkContext
-    sc.setLogLevel("WARN")
-    val t0 = System.currentTimeMillis()
-
-    var transactionsRDD: RDD[Itemset] = null
-    var support: Int = 0
-
-    if (!fileName.isEmpty) {
-      // Fetch transaction
-      val file = getClass.getResource(fileName).getPath
-      transactionsRDD = sc.textFile(file, 8)
-        .filter(!_.trim.isEmpty)
-        .map(_.split(separator + "+"))
-        .map(l => l.map(_.trim).toList)
-        .cache()
-      support = absoluteSupport(minSupport, transactionsRDD.count().toInt)
-    }
-    else {
-      transactionsRDD = sc.parallelize(transactions)
-      support = absoluteSupport(minSupport, transactions.size)
-    }
-
-    // Generate singletons
-    val singletons = transactionsRDD
-      .flatMap(identity)
-      .map(item => (item, 1))
-      .reduceByKey(_ + _)
-      .filter(_._2 >= support)
-      .collect.toSeq
-      .sortBy(_._2) // todo: sort by in spark
-      .reverse.map(t => t._1)
-
-    val result = dfps(transactionsRDD, singletons, support, spark)
-    executionTime = System.currentTimeMillis() - t0
-    result
   }
 
 }

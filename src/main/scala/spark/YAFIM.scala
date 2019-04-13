@@ -3,20 +3,17 @@ package spark
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
+import sequential.Apriori
 import sequential.Apriori.Itemset
-import sequential.Util.absoluteSupport
-import sequential.{Apriori, FIM}
 
 import scala.collection.mutable
 
 
 object YAFIM {
-
   def main(args: Array[String]): Unit = {
     val fim = new YAFIM
     val frequentSets = fim.execute("/datasets/mushroom.txt", " ", 0.35)
   }
-
 }
 
 /**
@@ -24,48 +21,12 @@ object YAFIM {
   * 1. Generate singletons
   * 2. Find K+1 frequent itemsets
   */
-class YAFIM extends FIM with Serializable {
+class YAFIM extends SparkFIM with Serializable {
 
-  override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
-    val spark = SparkSession.builder()
-      .appName("YAFIM")
-      .master("local[4]")
-      //.config("spark.eventLog.enabled", "true")
-      .getOrCreate()
+  override def findFrequentItemsets(transactions: RDD[Itemset], singletons: RDD[(String, Int)], minSupport: Int,
+                                    spark: SparkSession, sc: SparkContext): List[Itemset] = {
 
-    val sc = spark.sparkContext
-    sc.setLogLevel("WARN")
-    val t0 = System.currentTimeMillis()
-
-    var transactionsRDD: RDD[Itemset] = null
-    var support: Int = 0
-
-    if (!fileName.isEmpty) {
-      // Fetch transaction
-      //val file = List.fill(4)(getClass.getResource(fileName).getPath).mkString(",")
-      val file = getClass.getResource(fileName).getPath
-      transactionsRDD = sc.textFile(file, 8)
-        .filter(!_.trim.isEmpty)
-        .map(_.split(separator + "+"))
-        .map(l => l.map(_.trim).toList)
-        .cache()
-      support = absoluteSupport(minSupport, transactionsRDD.count().toInt)
-    }
-    else {
-      transactionsRDD = sc.parallelize(transactions)
-      support = absoluteSupport(minSupport, transactions.size)
-    }
-
-    // Generate singletons
-    val singletonsRDD = transactionsRDD
-      .flatMap(identity)
-      .map(item => (item, 1))
-      .reduceByKey(_ + _)
-      .filter(_._2 >= support)
-      .map(_._1)
-
-    val frequentItemsets = mutable.Map(1 -> singletonsRDD.map(List(_)).collect().toList)
-
+    val frequentItemsets = mutable.Map(1 -> singletons.map(_._1).map(List(_)).collect().toList)
     var k = 1
     while (frequentItemsets.get(k).nonEmpty) {
       k += 1
@@ -74,14 +35,12 @@ class YAFIM extends FIM with Serializable {
       val candidates = candidateGeneration(frequentItemsets(k - 1), sc)
 
       // Final filter by checking with all transactions
-      val kFrequentItemsetsRDD = filterFrequentItemsets(candidates, transactionsRDD, support, sc)
+      val kFrequentItemsetsRDD = filterFrequentItemsets(candidates, transactions, minSupport, sc)
       if (!kFrequentItemsetsRDD.isEmpty()) {
         frequentItemsets.update(k, kFrequentItemsetsRDD.collect().toList)
       }
     }
-    val result = frequentItemsets.values.flatten.toList
-    executionTime = System.currentTimeMillis() - t0
-    result
+    frequentItemsets.values.flatten.toList
   }
 
   private def candidateGeneration(frequentSets: List[Itemset], sc: SparkContext) = {

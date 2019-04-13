@@ -17,7 +17,6 @@ object HashTree {
   }
 }
 
-// TODO: Check ratio of buckets and hit buckets too
 /**
   * Stones in the way:
   * - Duplicated visits, return node and then distinct
@@ -33,7 +32,8 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   val size = candidates.head.size
   val rootNode = new Node(0)
 
-  // todo: group items
+  // todo: group items in hash function
+  // todo: would group by ratio help?
   val hashes = mutable.Map[String, Int]()
   for (i <- items.indices) {
     hashes.update(items(i), i)
