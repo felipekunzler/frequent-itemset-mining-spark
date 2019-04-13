@@ -36,6 +36,7 @@ class FPGrowth extends FIM {
   def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
     val support = Util.absoluteSupport(minSupport, transactions.size)
     val singletons = mutable.LinkedHashMap(findSingletons(transactions, support).map(i => i -> Option.empty[FPNode]): _*)
+    //println(s"Num of items: ${transactions.flatten.distinct.size}")
     val fpTree = new FPTree(transactions, support, singletons)
 
     singletons.keys.toList.reverse
@@ -58,7 +59,7 @@ class FPGrowth extends FIM {
     * Prefix: {d} => Out: {da, db, dc}
     * Prefix: {dc} => Out: {dca, dcb}
     */
-   def generatePrefixes(prefix: List[String], header: scala.collection.Set[String]): List[List[String]] = {
+  def generatePrefixes(prefix: List[String], header: scala.collection.Set[String]): List[List[String]] = {
     header.filter(i => !prefix.contains(i))
       .map(i => i +: prefix).toList
   }

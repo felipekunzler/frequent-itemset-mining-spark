@@ -17,14 +17,12 @@ object HashTree {
   }
 }
 
-// TODO: Is only one hash tree shipped to each server?
-// TODO: Built tree of size 3 and rows 24 in 0 -> Searched all tree in 85 [Something went wrong here]
 // TODO: Check ratio of buckets and hit buckets too
 /**
   * Stones in the way:
   * - Duplicated visits, return node and then distinct
-  * - Always linear hash tree (actual issue? try removing fix)
   * - Needed to sort transaction
+  * - Always linear hash tree (actual issue? try removing fix)
   * - Reduce number of visited children (start to transaction.size - size + level + 1)
   * - Hash function should distribute possible items evenly. (2x speed)
   * - Prune transaction before traversing the hash tree (according to the generated transactions (last frequents may also work))
@@ -35,6 +33,7 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   val size = candidates.head.size
   val rootNode = new Node(0)
 
+  // todo: group items
   val hashes = mutable.Map[String, Int]()
   for (i <- items.indices) {
     hashes.update(items(i), i)
@@ -71,7 +70,6 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   private def getNextNode(candidate: Itemset, currentNode: Node): Node = {
     val item = candidate(currentNode.level)
     val position = hash(item)
-    //println(s"item: $item; position $position")
     if (currentNode.children.contains(position)) {
       currentNode.children(position)
     }
@@ -95,14 +93,12 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   private def findCandidatesForTransaction(transaction: Itemset, start: Int, currentNode: Node): ListBuffer[Node] = {
     val foundCandidates = new ListBuffer[Node]()
 
-    for (i <- start until Math.min(transaction.size, transaction.size - size + currentNode.level + 1)) { // Iterate at most <size> times. Not actually true. But doesn't seem to be entire dataset either, maybe stop if reach all?
+    for (i <- start until Math.min(transaction.size, transaction.size - size + currentNode.level + 1)) {
       val item = transaction(i)
       val nextNode = findNextNode(item, currentNode)
       if (nextNode != null) { // node may not exist for a given transaction
         if (nextNode.candidatesBucket.nonEmpty) {
-          //val matchingCandidates = nextNode.candidatesBucket.filter(c => apriori.candidateExistsInTransaction(c, transaction))
           foundCandidates.append(nextNode)
-          //println(s"Found bucket. item $item, ${nextNode.candidatesBucket}")
         }
         else {
           val nextCandidates = findCandidatesForTransaction(transaction, i + 1, nextNode)
@@ -123,9 +119,7 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
       null
   }
 
-  def hash(item: String): Int = {
-    hashes(item)
-  }
+  def hash(item: String): Int = hashes(item)
 
   class Node(val level: Int) extends Serializable {
 

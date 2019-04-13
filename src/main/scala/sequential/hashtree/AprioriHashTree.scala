@@ -30,7 +30,7 @@ class AprioriHashTree extends Apriori {
       val hashTree = new HashTree(possibleItemsets, items)
       println(s"Built tree of size ${possibleItemsets.head.size} and rows ${possibleItemsets.size} in ${(System.currentTimeMillis() - t0) / 1000}")
       val t1 = System.currentTimeMillis()
-      // Maybe pruninig the transaction using the previous frequents?
+
       val r = transactions.flatMap(t => hashTree.findCandidatesForTransaction(t.filter(i => items.contains(i)).sorted))
       println(s"Searched tree in ${(System.currentTimeMillis() - t1) / 1000}")
       val t2 = System.currentTimeMillis()

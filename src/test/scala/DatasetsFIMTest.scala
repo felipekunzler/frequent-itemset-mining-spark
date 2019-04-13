@@ -4,7 +4,7 @@ import sequential.Apriori.Itemset
 import sequential._
 import sequential.fpgrowth.FPGrowth
 import sequential.hashtree.AprioriHashTree
-import spark.{YAFIM, YAFIMHashTree}
+import spark.{DFPS, YAFIM, YAFIMHashTree}
 
 import scala.collection.mutable
 

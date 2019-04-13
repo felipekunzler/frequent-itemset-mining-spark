@@ -12,7 +12,7 @@ trait FIM {
     val itemsets = findFrequentItemsets("", "", transactions, minSupport)
     if (executionTime == 0)
       executionTime = System.currentTimeMillis() - t0
-    println(f"Elapsed time: ${executionTime/1000d}%1.2f seconds. Class: ${getClass.getSimpleName}. Items: ${transactions.size}")
+    println(f"Elapsed time: ${executionTime / 1000d}%1.2f seconds. Class: ${getClass.getSimpleName}. Items: ${transactions.size}")
     itemsets
   }
 
@@ -22,7 +22,7 @@ trait FIM {
     val itemsets = findFrequentItemsets(fileName, separator, List.empty, minSupport)
     if (executionTime == 0)
       executionTime = System.currentTimeMillis() - t0
-    println(f"Elapsed time: ${executionTime/1000d}%1.2f seconds. Class: ${getClass.getSimpleName}.")
+    println(f"Elapsed time: ${executionTime / 1000d}%1.2f seconds. Class: ${getClass.getSimpleName}.")
     itemsets
   }
 

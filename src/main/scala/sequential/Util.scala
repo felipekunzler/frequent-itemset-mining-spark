@@ -35,6 +35,7 @@ object Util {
   }
 
   def printItemsets(itemsets: List[Itemset]) = {
+    println(s"Found ${itemsets.size} itemsets")
     SortedMap(itemsets.groupBy(itemset => itemset.size).toSeq: _*)
       .mapValues(i => i.map(set => s"{${set.mkString(", ")}}").mkString(", "))
       .foreach(t => println(s"[${t._1}] ${t._2}"))
@@ -63,7 +64,9 @@ object Util {
       cells.mkString("|", "|", "|")
     }
 
-    def rowSeparator(colSizes: Seq[Int]) = colSizes map { "-" * _ } mkString("+", "+", "+")
+    def rowSeparator(colSizes: Seq[Int]) = colSizes map {
+      "-" * _
+    } mkString("+", "+", "+")
   }
 
 }

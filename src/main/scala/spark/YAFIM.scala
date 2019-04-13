@@ -24,14 +24,6 @@ object YAFIM {
   * 1. Generate singletons
   * 2. Find K+1 frequent itemsets
   */
-// output all candidates from this transaction of size n. e.g:
-//    candidates: {1,3}, {1,2}, {1,4}, {5,6}
-//    t: {1,2,3}
-//    out: {1,3}, {1,2}
-// either 1. loop over all candidates and output those who are a subset of the transaction
-// manter opção 1 também
-// or, 2. generate all possible candidates of size n from T and check on the hash tree if exists and outputs it
-// 2 seems to be recommended.
 class YAFIM extends FIM with Serializable {
 
   override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
@@ -119,7 +111,7 @@ class YAFIM extends FIM with Serializable {
     val filteredCandidatesRDD = transactionsRDD.flatMap(t => {
       candidatesBC.value.flatMap(c => {
         // candidate exists within the transaction
-        //if (c.intersect(t).length == c.length)
+        //if (t.intersect(itemset).size == itemset.size) { TODO: Why intersect so much slower?
         if (apriori.candidateExistsInTransaction(c, t))
           List(c)
         else

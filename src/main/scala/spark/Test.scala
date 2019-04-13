@@ -2,8 +2,6 @@ package spark
 
 import org.apache.spark.sql.SparkSession
 
-import scala.util.Random
-
 object Test {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
@@ -18,8 +16,8 @@ object Test {
     val sc = spark.sparkContext
     sc.parallelize(1 to 24, 24)
       .map(n => {
-        for(i <- 1 to 10000)
-          for(j <- 1 to 10000)
+        for (i <- 1 to 10000)
+          for (j <- 1 to 10000)
             i + j
         n
       }).count()

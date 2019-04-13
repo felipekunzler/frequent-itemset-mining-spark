@@ -27,8 +27,8 @@ class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutab
         currentParentNode = newNode
         // if not there, put there, otherwise, replace
         if (singletons(item).isEmpty) {
-            newNode.lastItemLink = newNode
-            singletons.update(item, Option.apply(newNode))
+          newNode.lastItemLink = newNode
+          singletons.update(item, Option.apply(newNode))
         }
         else {
           val lastItem = singletons(item).get.lastItemLink

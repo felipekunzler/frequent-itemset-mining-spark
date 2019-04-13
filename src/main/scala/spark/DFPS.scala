@@ -21,7 +21,7 @@ class DFPS extends FIM with Serializable {
       .collect().toList ++ singletons.map(List(_))
   }
 
-  def minePatternFragment(prefix: String, conditionalPatterns: List[Itemset], minSupport: Int)= {
+  def minePatternFragment(prefix: String, conditionalPatterns: List[Itemset], minSupport: Int) = {
     val fpGrowth = new FPGrowth
     val singletons = mutable.LinkedHashMap(fpGrowth.findSingletons(conditionalPatterns, minSupport).map(i => i -> Option.empty[FPNode]): _*)
     val condFPTree = new FPTree(conditionalPatterns, minSupport, singletons)
@@ -33,10 +33,10 @@ class DFPS extends FIM with Serializable {
   /**
     * in: f,c,a,m,p
     * out:
-    *   p -> f,c,a,m
-    *   m -> f,c,a
-    *   a -> f,c
-    *   c -> f
+    * p -> f,c,a,m
+    * m -> f,c,a
+    * a -> f,c
+    * c -> f
     */
   def buildConditionalPatternsBase(transaction: Itemset): List[(String, Itemset)] = {
     (1 until transaction.size).map(i => (transaction(i), transaction.slice(0, i))).toList

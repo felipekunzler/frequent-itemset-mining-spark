@@ -39,7 +39,6 @@ class Apriori extends FIM with Serializable {
   var singletons = List[String]()
 
   def findFrequentItemsets(transactions: List[Itemset], minSupport: Double): List[Itemset] = {
-    //val transactions = tr ++ tr ++ tr ++ tr
     val support = Util.absoluteSupport(minSupport, transactions.size)
     singletons = findSingletons(transactions, support)
     val frequentItemsets = mutable.Map(1 -> singletons.map(i => List(i)))
@@ -61,7 +60,6 @@ class Apriori extends FIM with Serializable {
     for (t <- transactions) {
       for ((itemset, count) <- map) {
         // Transactions contains all items from itemset
-        //if (t.intersect(itemset).size == itemset.size) {
         if (candidateExistsInTransaction(itemset, t)) {
           map.update(itemset, count + 1)
         }
