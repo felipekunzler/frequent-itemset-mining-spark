@@ -8,5 +8,6 @@ val sparkVersion = "2.4.0"
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % "test",
   "org.apache.spark" %% "spark-core" % sparkVersion,
-  "org.apache.spark" %% "spark-mllib" % sparkVersion
+  "org.apache.spark" %% "spark-mllib" % sparkVersion,
+  "com.github.alexandrnikitin" %% "bloom-filter" % "0.11.0"
 )

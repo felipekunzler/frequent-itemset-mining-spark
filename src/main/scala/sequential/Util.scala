@@ -38,7 +38,7 @@ object Util {
   def printItemsets(itemsets: List[Itemset]) = {
     println(s"Found ${itemsets.size} itemsets")
     SortedMap(itemsets.groupBy(itemset => itemset.size).toSeq: _*)
-      .mapValues(i => i.map(set => s"{${set.mkString(", ")}}").mkString(", "))
+      .mapValues(i => i.map(set => s"{${set.sorted.mkString(", ")}}").sorted.mkString(", "))
       .foreach(t => println(s"[${t._1}] ${t._2}"))
   }
 

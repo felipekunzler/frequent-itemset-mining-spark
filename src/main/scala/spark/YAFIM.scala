@@ -39,14 +39,15 @@ class YAFIM extends SparkFIM with Serializable {
 
       // Final filter by checking with all transactions
       val kFrequentItemsets = filterFrequentItemsets(candidates, transactions, minSupport, sc)
-      if (!kFrequentItemsets.isEmpty) {
+      if (kFrequentItemsets.nonEmpty) {
+        if (k == 2) println(s"Found ${kFrequentItemsets.size} frequents for k=2.")
         frequentItemsets.update(k, kFrequentItemsets)
       }
     }
     frequentItemsets.values.flatten.toList
   }
 
-  private def candidateGeneration(frequentSets: List[Itemset], sc: SparkContext) = {
+  def candidateGeneration(frequentSets: List[Itemset], sc: SparkContext) = {
     val apriori = new Apriori with Serializable
 
     val previousFrequentSets = sc.parallelize(frequentSets)
