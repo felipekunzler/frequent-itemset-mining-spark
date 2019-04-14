@@ -29,7 +29,10 @@ class DFPS extends SparkFIM with Serializable {
     val condFPTree = new FPTree(conditionalPatterns, minSupport, singletons)
     val prefixes = fpGrowth.generatePrefixes(List(prefix), singletons.keySet)
 
-    prefixes.flatMap(p => fpGrowth.findFrequentItemsets(condFPTree, p, minSupport))
+    val t0 = System.currentTimeMillis()
+    val r = prefixes.flatMap(p => fpGrowth.findFrequentItemsets(condFPTree, p, minSupport))
+    println(s"Searched fp-tree in ${(System.currentTimeMillis() - t0) / 1000}s.")
+    r
   }
 
   /**

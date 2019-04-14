@@ -10,6 +10,8 @@ class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutab
 
   val rootNode = new FPNode(null, 0, null)
 
+  val t0 = System.currentTimeMillis()
+
   for (itemset <- transactions) {
     val items = singletons.keys.toList
     val sortedItemset = itemset.filter(i => items.contains(i)).sortWith((a, b) => items.indexOf(a) < items.indexOf(b))
@@ -38,6 +40,8 @@ class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutab
       }
     }
   }
+
+  println(s"Built fp-tree for ${transactions.size} transactions in ${System.currentTimeMillis() - t0}ms.")
 
   /*
     * TODO: Currently contains infrequent items (say b:2 for sup 3)

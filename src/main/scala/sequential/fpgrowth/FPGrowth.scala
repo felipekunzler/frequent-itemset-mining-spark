@@ -38,8 +38,11 @@ class FPGrowth extends FIM {
     //println(s"Num of items: ${transactions.flatten.distinct.size}")
     val fpTree = new FPTree(transactions, support, singletons)
 
-    singletons.keys.toList.reverse
+    val t0 = System.currentTimeMillis()
+    val r = singletons.keys.toList.reverse
       .flatMap(s => findFrequentItemsets(fpTree, List(s), support))
+    println(s"Searched fp-tree in ${(System.currentTimeMillis() - t0) / 1000}s.")
+    r
   }
 
   def findFrequentItemsets(fpTree: FPTree, prefix: List[String], minSupport: Int): List[Itemset] = {

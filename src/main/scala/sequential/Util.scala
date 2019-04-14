@@ -34,6 +34,7 @@ object Util {
     "{" + rule._1.mkString(", ") + "} -> {" + rule._2.mkString(", ") + "}"
   }
 
+  // todo: print as matrix, per dataset/algorithm
   def printItemsets(itemsets: List[Itemset]) = {
     println(s"Found ${itemsets.size} itemsets")
     SortedMap(itemsets.groupBy(itemset => itemset.size).toSeq: _*)
