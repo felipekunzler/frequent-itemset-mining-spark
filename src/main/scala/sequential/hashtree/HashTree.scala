@@ -28,6 +28,7 @@ object HashTree {
   *
   * Notes:
   * - Proper hash tree on k=2 is very slow, only two levels and 4 buckets, that's why the "wrong" way is much better
+  * - Hash function doesn't have to be mod of size, higher is better in some cases. YAFIMHashTree much faster on 2nd iteration.
   */
 class HashTree(val candidates: List[Itemset], val items: List[String]) extends Serializable {
 
@@ -36,11 +37,10 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   val rootNode = new Node(0)
 
   val t0 = System.currentTimeMillis()
-  // todo: group items in hash function
   // todo: would group by ratio help?
   val hashes = mutable.Map[String, Int]()
   for (i <- items.indices) {
-    hashes.update(items(i), i) // i % size
+    hashes.update(items(i), i % Math.max(size, items.size / size))
   }
 
   for (candidate <- candidates) {

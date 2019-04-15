@@ -11,8 +11,6 @@ import scala.collection.mutable
 class RApriori extends YAFIMHashTree {
 
   def findPairsBloomFilter(transactions: RDD[Itemset], singletons: List[String], minSupport: Int, sc: SparkContext): List[Itemset] = {
-    // todo: why false positive rate doesn't change outcome?
-    //  either because all singletons are valid or one or two false positives won't be frequent enough
 
     val bf = BloomFilter[String](singletons.size, 0.01)
     singletons.foreach(bf.add)
