@@ -26,7 +26,7 @@ class DFPS extends SparkFIM with Serializable {
   def minePatternFragment(prefix: String, conditionalPatterns: List[Itemset], minSupport: Int) = {
     val fpGrowth = new FPGrowth
     val singletons = mutable.LinkedHashMap(fpGrowth.findSingletons(conditionalPatterns, minSupport).map(i => i -> Option.empty[FPNode]): _*)
-    val condFPTree = new FPTree(conditionalPatterns, minSupport, singletons)
+    val condFPTree = new FPTree(conditionalPatterns.map((_, 1)), minSupport, singletons)
     val prefixes = fpGrowth.generatePrefixes(List(prefix), singletons.keySet)
 
     val t0 = System.currentTimeMillis()

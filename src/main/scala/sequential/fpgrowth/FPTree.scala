@@ -6,7 +6,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
-class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutable.Map[String, Option[FPNode]]) {
+class FPTree(transactions: List[(Itemset, Int)], minSupport: Int, val singletons: mutable.Map[String, Option[FPNode]]) {
 
   val rootNode = new FPNode(null, 0, null)
 
@@ -14,17 +14,17 @@ class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutab
 
   for (itemset <- transactions) {
     val items = singletons.keys.toList
-    val sortedItemset = itemset.filter(i => items.contains(i)).sortWith((a, b) => items.indexOf(a) < items.indexOf(b))
+    val sortedItemset = itemset._1.filter(i => items.contains(i)).sortWith((a, b) => items.indexOf(a) < items.indexOf(b))
     var currentParentNode = rootNode
     for (item <- sortedItemset) {
       // If path exists, increment, if not, create new node
       val existingNode = currentParentNode.matchingChildren(item)
       if (existingNode.nonEmpty) {
-        existingNode.get.support += 1
+        existingNode.get.support += itemset._2
         currentParentNode = existingNode.get
       }
       else {
-        val newNode = new FPNode(item, 1, currentParentNode)
+        val newNode = new FPNode(item, itemset._2, currentParentNode)
         currentParentNode.children += newNode
         currentParentNode = newNode
         // if not there, put there, otherwise, replace
@@ -48,7 +48,7 @@ class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutab
     * TODO: Support prefix with size > 1. Not really needed, only pass the next prefix.
     */
   def conditionalTreeForPrefix(prefix: String, minSupport: Int): FPTree = {
-    val conditionalPatternBase = mutable.ListBuffer[Itemset]()
+    val conditionalPatternBase = mutable.ListBuffer[(Itemset, Int)]()
 
     var bottomNode = singletons(prefix).get
     while (bottomNode != null) {
@@ -61,9 +61,7 @@ class FPTree(transactions: List[Itemset], minSupport: Int, val singletons: mutab
       }
       // TODO: Maybe a hash map with cp and count to prevent duplicates?
       // TODO: Use min support to prune non frequent items somehow, either here or while building the FPTree
-      for (_ <- 0 until prefixSupport) {
-        conditionalPatternBase.append(itemset.toList)
-      }
+      conditionalPatternBase.append((itemset.toList, prefixSupport))
       bottomNode = bottomNode.itemLink
     }
 

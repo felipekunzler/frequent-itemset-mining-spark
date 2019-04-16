@@ -29,6 +29,9 @@ object FPGrowth {
   * 2. Build FP-Tree by creating all possible paths
   * 3. For each singleton, find a list of conditional pattern base
   * 4. Build the conditional FP-Tree
+  *
+  * Notes:
+  *   - Building FPTree using tuple with count
   */
 class FPGrowth extends FIM {
 
@@ -36,7 +39,7 @@ class FPGrowth extends FIM {
     val support = Util.absoluteSupport(minSupport, transactions.size)
     val singletons = mutable.LinkedHashMap(findSingletons(transactions, support).map(i => i -> Option.empty[FPNode]): _*)
     //println(s"Num of items: ${transactions.flatten.distinct.size}")
-    val fpTree = new FPTree(transactions, support, singletons)
+    val fpTree = new FPTree(transactions.map((_, 1)), support, singletons)
 
     val t0 = System.currentTimeMillis()
     val r = singletons.keys.toList.reverse
