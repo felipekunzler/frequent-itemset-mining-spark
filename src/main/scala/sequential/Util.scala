@@ -8,6 +8,8 @@ import scala.io.Source
 
 object Util {
 
+  var replicateNTimes: Int = 1
+
   def absoluteSupport(minSupport: Double, numTransactions: Int) = (numTransactions * minSupport + 0.5).toInt
 
   def percentageSupport(minSupport: Int, numTransactions: Int) = minSupport / numTransactions.toDouble
@@ -21,7 +23,7 @@ object Util {
 
   def parseTransactions(fileName: String, separator: String = ","): List[Itemset] = {
     parseTransactions(
-      Source.fromInputStream(getClass.getResourceAsStream(fileName)).getLines.toList,
+      (1 to replicateNTimes).flatMap(_ => Source.fromInputStream(getClass.getResourceAsStream(fileName)).getLines).toList,
       separator
     )
   }

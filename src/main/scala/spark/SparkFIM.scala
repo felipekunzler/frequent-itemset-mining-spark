@@ -4,7 +4,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import sequential.Apriori.Itemset
-import sequential.FIM
+import sequential.{FIM, Util}
 import sequential.Util.absoluteSupport
 
 
@@ -36,8 +36,7 @@ trait SparkFIM extends FIM {
 
     if (!fileName.isEmpty) {
       // Fetch transaction
-      //val file = List.fill(4)(getClass.getResource(fileName).getPath).mkString(",")
-      val file = getClass.getResource(fileName).getPath
+      val file = List.fill(Util.replicateNTimes)(getClass.getResource(fileName).getPath).mkString(",")
       transactionsRDD = sc.textFile(file, 8)
         .filter(!_.trim.isEmpty)
         .map(_.split(separator + "+"))

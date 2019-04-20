@@ -26,6 +26,7 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
     (1, "T10I4D100K.txt", 0.03))
 
   private val runNTimes = 3
+  Util.replicateNTimes = 5
 
   private val executionTimes: mutable.Map[(String, String), List[Long]] = mutable.LinkedHashMap()
   private val resultsCache: mutable.Map[String, List[Itemset]] = mutable.Map()
@@ -68,7 +69,7 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
         r
       }
     }).toSeq
-    println("\nExecution times:\n" + Util.Tabulator.format(header +: rows))
+    println(s"\nExecution times replicating ${Util.replicateNTimes} time(s)\n" + Util.Tabulator.format(header +: rows))
   }
 
   def formatExecution(value: Double): String = {

@@ -14,7 +14,7 @@ class FPTree(transactions: List[(Itemset, Int)], minSupport: Int, val singletons
 
   for (itemset <- transactions) {
     val items = singletons.keys.toList
-    val sortedItemset = itemset._1.filter(i => items.contains(i)).sortWith((a, b) => items.indexOf(a) < items.indexOf(b))
+    val sortedItemset = itemset._1.filter(i => items.contains(i))//.sortWith((a, b) => items.indexOf(a) < items.indexOf(b))
     var currentParentNode = rootNode
     for (item <- sortedItemset) {
       // If path exists, increment, if not, create new node
