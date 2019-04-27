@@ -1,5 +1,6 @@
 package spark
 
+import experiments.Runner
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
@@ -21,11 +22,17 @@ trait SparkFIM extends FIM {
     * Generates a transaction and singletons RDD as well as calculate minimum support from a percentage.
     */
   override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
-    val spark = SparkSession.builder()
-      .appName("FIM")
-      .master("local[4]")
-      //.config("spark.eventLog.enabled", "true")
-      .getOrCreate()
+    var spark: SparkSession = null
+    if (!Runner.clusterMode) {
+      spark = SparkSession.builder()
+        .appName("FIM")
+        .master("local[4]")
+        //.config("spark.eventLog.enabled", "true")
+        .getOrCreate()
+    }
+    else {
+      spark = SparkSession.builder().getOrCreate()
+    }
 
     val sc = spark.sparkContext
     sc.setLogLevel("WARN")
@@ -36,7 +43,7 @@ trait SparkFIM extends FIM {
 
     if (!fileName.isEmpty) {
       // Fetch transaction
-      val file = List.fill(Util.replicateNTimes)(getClass.getResource(fileName).getPath).mkString(",")
+      val file = List.fill(Util.replicateNTimes)(fileName).mkString(",")
       transactionsRDD = sc.textFile(file, Util.minPartitions)
         .filter(!_.trim.isEmpty)
         .map(_.split(separator + "+"))

@@ -1,74 +1,61 @@
 package experiments
 
-import java.util.{Properties, ResourceBundle}
+import java.util.Properties
 
-import sequential.Util.getClass
 import sequential._
 import sequential.fpgrowth.FPGrowth
 import sequential.hashtree.AprioriHashTree
 import spark.{DFPS, RApriori, YAFIM, YAFIMHashTree}
 
 import scala.collection.mutable
-import scala.io.Source
 
 
 object Runner {
   def main(args: Array[String]): Unit = {
     new Runner().run()
   }
+
+  var clusterMode: Boolean = false
+
 }
 
 class Runner {
 
-  private val fimInstances = List(
-    (0, () => new Apriori),
-    (0, () => new AprioriHashTree),
-    (0, () => new FPGrowth),
-    (0, () => new YAFIM),
-    (0, () => new YAFIMHashTree),
-    (1, () => new RApriori),
-    (1, () => new DFPS))
+  val fimProperties = getClass.getResourceAsStream("/fim.properties")
+  val defaultProperties = getClass.getResourceAsStream("/defaultfim.properties")
 
-  private val datasets = List(
-    (0, "mushroom.txt", 0.35),
-    (1, "pumsb_star.txt", 0.65),
-    (1, "chess.txt", 0.85),
-    (0, "T10I4D100K.txt", 0.003))
+  val properties = new Properties()
+  properties.load(if (fimProperties != null) fimProperties else defaultProperties)
 
-  private val runNTimes = 3
-  private val replicateFromTo = 1 to 5
+  private val runNTimes = getInt("fim.runNTimes")
+  private val replicatingDataset: Array[Int] = properties.getProperty("fim.datasetReplicating").split(",")
+    .map(_.trim)
+    .map(_.toInt)
 
-  private val executionTimes: mutable.ListBuffer[mutable.Map[(String, String), List[Long]]] = mutable.ListBuffer()
+  private val executionTimes: mutable.Map[Int, mutable.Map[(String, String), List[Long]]] = mutable.Map()
 
-  def loadConfig(): Unit = {
-    val default = getClass.getResourceAsStream("/defaultfim.properties")
-    val properties = new Properties()
-    properties.load(default)
-
-    println(properties.get("fim.runNTimes"))
-  }
+  Runner.clusterMode = properties.getProperty("fim.clusterMode", "false").toBoolean
 
   def run(): Unit = {
-    loadConfig()
-    Util.minPartitions = 8
-    val totalRuns = replicateFromTo.size * datasets.count(_._1 == 1) * runNTimes * fimInstances.count(_._1 == 1)
+    Util.minPartitions = getInt("fim.minPartitions")
+    val totalRuns = replicatingDataset.length * datasets.size * runNTimes * fimInstances.count(_._1 == 1)
     var currentRun = 1
 
-    replicateFromTo.map(_ - 1).foreach(replicating => {
-      executionTimes.append(mutable.LinkedHashMap())
-      Util.replicateNTimes = replicating + 1
+    replicatingDataset.foreach(replicating => {
+      executionTimes.put(replicating, mutable.LinkedHashMap())
+      Util.replicateNTimes = replicating
 
-      datasets.filter(_._1 == 1).foreach(t => {
+      datasets.foreach(t => {
         for (run <- 1 to runNTimes) {
           fimInstances.filter(_._1 == 1).map(_._2.apply()).foreach(fim => {
 
             val className = fim.getClass.getSimpleName
-            println(s"\nRunning: $className - ${t._2} - $run - x${replicating + 1}")
+            println(s"\nRunning: $className - ${t._1} - $run - x${replicating}")
             println(s"($currentRun / $totalRuns)")
-            val frequentSets = fim.execute("/datasets/" + t._2, " ", t._3)
+            val frequentSets = fim.execute(t._2, " ", t._3)
             Util.printItemsets(frequentSets)
 
-            val key = (className, s"${t._2}")
+            val key = (className, s"${t._1}")
             val executions = executionTimes(replicating).getOrElse(key, List.empty[Long])
             executionTimes(replicating).update(key, executions :+ fim.executionTime)
             currentRun += 1
@@ -78,9 +65,9 @@ class Runner {
       printExecutionsForReplication(replicating)
     })
 
-    if (replicateFromTo.size > 1) {
+    if (replicatingDataset.length > 1) {
       println("\n==== Final execution times ====\n")
-      replicateFromTo.map(_ - 1).foreach(printExecutionsForReplication)
+      replicatingDataset.foreach(printExecutionsForReplication)
     }
   }
 
@@ -99,11 +86,33 @@ class Runner {
         r
       }
     }).toSeq
-    println(s"\nExecution times replicating ${replication + 1} time(s)\n" + Util.Tabulator.format(header +: rows))
+    println(s"\nExecution times replicating ${replication} time(s)\n" + Util.Tabulator.format(header +: rows))
   }
 
   def formatExecution(value: Double): String = {
     f" ${value / 1000d}%1.2f "
   }
+
+  def getInt(prop: String): Int = Integer.parseInt(properties.getProperty(prop))
+
+  private val classes = List(
+    ("Apriori", () => new Apriori),
+    ("AprioriHashTree", () => new AprioriHashTree),
+    ("FPGrowth", () => new FPGrowth),
+    ("YAFIM", () => new YAFIM),
+    ("YAFIMHashTree", () => new YAFIMHashTree),
+    ("RApriori", () => new RApriori),
+    ("DFPS", () => new DFPS))
+
+  private val fimInstances = classes.map(c => {
+    (getInt(s"fim.class.${c._1}"), c._2)
+  })
+
+  private val datasets = List("mushroom", "pumsb_star", "chess", "T10I4D100K")
+    .map(d => (d, "fim.dataset." + d))
+    .filter(d => getInt(d._2) > 0)
+    .map(d => {
+      (d._1, properties.getProperty(d._2 + ".path"), properties.getProperty(d._2 + ".support").toDouble)
+    })
 
 }

@@ -23,10 +23,12 @@ object Util {
   }
 
   def parseTransactions(fileName: String, separator: String = ","): List[Itemset] = {
+
     parseTransactions(
-      (1 to replicateNTimes).flatMap(_ => Source.fromInputStream(getClass.getResourceAsStream(fileName)).getLines).toList,
-      separator
-    )
+      (1 to replicateNTimes).flatMap(_ => {
+        val file = Source.fromFile(fileName, "UTF-8")
+        file.getLines
+      }).toList, separator)
   }
 
   def parseTransactionsByText(text: String): List[Itemset] = {
