@@ -74,7 +74,8 @@ class FIMTest extends FunSuite {
     }
 
     test(s"$className - Ensure grocery store") {
-      val itemsets = Util.parseTransactions("/GroceryStoreDataSet.csv").take(1000)
+      val path = getClass.getResource("/GroceryStoreDataSet.csv").getPath
+      val itemsets = Util.parseTransactions(path).take(1000)
       val minSupport = 1
       val frequentSets = fim.execute(itemsets, minSupport)
       val expectedItemsets = sourceOfTruth.execute(itemsets, minSupport)

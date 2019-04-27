@@ -52,8 +52,8 @@ class Runner {
             val className = fim.getClass.getSimpleName
             println(s"\nRunning: $className - ${t._1} - $run - x${replicating}")
             println(s"($currentRun / $totalRuns)")
-            val frequentSets = fim.execute(t._2, " ", t._3)
-            Util.printItemsets(frequentSets)
+            fim.execute(t._2, " ", t._3)
+            //Util.printItemsets(frequentSets)
 
             val key = (className, s"${t._1}")
             val executions = executionTimes(replicating).getOrElse(key, List.empty[Long])

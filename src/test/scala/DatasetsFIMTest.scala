@@ -13,20 +13,20 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
   private val fimInstances = List(
     (0, () => new Apriori),
     (1, () => new AprioriHashTree),
-    (1, () => new FPGrowth),
-    (1, () => new YAFIM),
-    (1, () => new YAFIMHashTree),
-    (1, () => new RApriori),
+    (0, () => new FPGrowth),
+    (0, () => new YAFIM),
+    (0, () => new YAFIMHashTree),
+    (0, () => new RApriori),
     (1, () => new DFPS))
 
   private val datasets = List(
     (1, "mushroom.txt", 0.35),
     (1, "pumsb_star.txt", 0.65),
-    (1, "chess.txt", 0.85),
-    (1, "T10I4D100K.txt", 0.03))
+    (0, "chess.txt", 0.85),
+    (0, "T10I4D100K.txt", 0.03))
 
-  private val runNTimes = 3
-  Util.replicateNTimes = 5
+  private val runNTimes = 1
+  Util.replicateNTimes = 1
 
   private val executionTimes: mutable.Map[(String, String), List[Long]] = mutable.LinkedHashMap()
   private val resultsCache: mutable.Map[String, List[Itemset]] = mutable.Map()
@@ -37,7 +37,8 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
 
         val className = fim.getClass.getSimpleName
         test(s"$className - ${t._2} - $run") {
-          val frequentSets = fim.execute("/datasets/" + t._2, " ", t._3)
+          val path = getClass.getResource("/datasets/" + t._2).getPath
+          val frequentSets = fim.execute(path, " ", t._3)
           Util.printItemsets(frequentSets)
 
           if (!resultsCache.contains(t._2 + t._3))
