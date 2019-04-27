@@ -37,7 +37,7 @@ trait SparkFIM extends FIM {
     if (!fileName.isEmpty) {
       // Fetch transaction
       val file = List.fill(Util.replicateNTimes)(getClass.getResource(fileName).getPath).mkString(",")
-      transactionsRDD = sc.textFile(file, 8)
+      transactionsRDD = sc.textFile(file, Util.minPartitions)
         .filter(!_.trim.isEmpty)
         .map(_.split(separator + "+"))
         .map(l => l.map(_.trim).toList)
