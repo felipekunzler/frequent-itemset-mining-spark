@@ -15,12 +15,15 @@ class DFPS extends SparkFIM with Serializable {
     // Generate singletons
     val sortedSingletons = singletons.collect.map(t => t._1)
 
-    transactions
-      .map(t => pruneAndSort(t, sortedSingletons))
-      .flatMap(buildConditionalPatternsBase)
-      .groupByKey(sortedSingletons.length - 1)
-      .flatMap(t => minePatternFragment(t._1, t._2.toList, minSupport))
-      .collect().toList ++ sortedSingletons.map(List(_))
+    if (sortedSingletons.nonEmpty) {
+      transactions
+        .map(t => pruneAndSort(t, sortedSingletons))
+        .flatMap(buildConditionalPatternsBase)
+        .groupByKey(sortedSingletons.length)
+        .flatMap(t => minePatternFragment(t._1, t._2.toList, minSupport))
+        .collect().toList ++ sortedSingletons.map(List(_))
+    }
+    else List.empty[Itemset]
   }
 
   def minePatternFragment(prefix: String, conditionalPatterns: List[Itemset], minSupport: Int) = {
