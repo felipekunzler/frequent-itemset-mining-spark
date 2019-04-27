@@ -44,7 +44,7 @@ class FPGrowth extends FIM {
     val t0 = System.currentTimeMillis()
     val r = singletons.keys.toList.reverse
       .flatMap(s => findFrequentItemsets(fpTree, List(s), support))
-    println(s"Searched fp-tree in ${(System.currentTimeMillis() - t0) / 1000}s.")
+    //println(s"Searched fp-tree in ${(System.currentTimeMillis() - t0) / 1000}s.")
     r
   }
 

@@ -31,7 +31,7 @@ class DFPS extends SparkFIM with Serializable {
 
     val t0 = System.currentTimeMillis()
     val r = prefixes.flatMap(p => fpGrowth.findFrequentItemsets(condFPTree, p, minSupport))
-    println(s"Searched fp-tree in ${(System.currentTimeMillis() - t0) / 1000}s.")
+    //println(s"Searched fp-tree in ${(System.currentTimeMillis() - t0) / 1000}s.")
     r
   }
 
@@ -50,7 +50,7 @@ class DFPS extends SparkFIM with Serializable {
   def pruneAndSort(transaction: Itemset, singletons: Seq[String]): Itemset = {
     transaction
       .filter(i => singletons.contains(i))
-      .sortWith((a, b) => singletons.indexOf(a) < singletons.indexOf(b))
+      .sortWith((a, b) => singletons.indexOf(a) < singletons.indexOf(b)) // todo: anyway to speedup initial sorting?
   }
 
 }
