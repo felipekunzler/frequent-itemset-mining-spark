@@ -11,18 +11,20 @@ import scala.collection.mutable
 class RApriori extends YAFIMHashTree {
 
   def findPairsBloomFilter(transactions: RDD[Itemset], singletons: List[String], minSupport: Int, sc: SparkContext): List[Itemset] = {
+    if (singletons.nonEmpty) {
+      val bf = BloomFilter[String](singletons.size, 0.01)
+      singletons.foreach(bf.add)
+      val bfBC = sc.broadcast(bf)
 
-    val bf = BloomFilter[String](singletons.size, 0.01)
-    singletons.foreach(bf.add)
-    val bfBC = sc.broadcast(bf)
-
-    transactions.map(t => t.filter(bfBC.value.mightContain(_))) // singletons.contains(_)
-      .flatMap(_.combinations(2))
-      .map((_, 1))
-      .reduceByKey(_ + _)
-      .filter(_._2 >= minSupport)
-      .map(_._1.sorted)
-      .collect().toList
+      transactions.map(t => t.filter(bfBC.value.mightContain(_))) // singletons.contains(_)
+        .flatMap(_.combinations(2))
+        .map((_, 1))
+        .reduceByKey(_ + _)
+        .filter(_._2 >= minSupport)
+        .map(_._1.sorted)
+        .collect().toList
+    }
+    else List.empty[Itemset]
   }
 
   override def findFrequentItemsets(transactions: RDD[Itemset], singletons: RDD[(String, Int)], minSupport: Int,
