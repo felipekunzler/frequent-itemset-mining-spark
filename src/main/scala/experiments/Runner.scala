@@ -93,6 +93,26 @@ class Runner {
       }
     }).toSeq
     println(s"\nExecution times replicating $replication time(s)\n" + Util.Tabulator.format(header +: rows))
+    printSimpleExecutionsForReplication(replication)
+  }
+
+  def printSimpleExecutionsForReplication(replication: Int): Unit = {
+    val header = "" +: fimInstances.filter(_._1 == 1).map(_._2.apply().getClass.getSimpleName).map(i => s" $i ")
+    val sets = datasets.map(_._1)
+    val rows = sets.flatMap(set => {
+      // assuming that execution times has same order as header
+      val row = s" $set " +: executionTimes(replication).filter(t => t._1._2 == set).map(t => {
+        var mean = 0d
+        if (runNTimes >= 3)
+          mean = (t._2.sum - t._2.max) / (runNTimes - 1)
+        else
+          mean = t._2.sum / runNTimes
+        formatExecution(mean)
+      }).toList
+      List(row)
+    })
+
+    println(s"\n" + Util.Tabulator.format(header +: rows))
   }
 
   def formatExecution(value: Double): String = {
