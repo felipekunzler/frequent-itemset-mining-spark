@@ -36,7 +36,8 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
       fimInstances.filter(_._1 == 1).map(_._2.apply()).foreach(fim => {
 
         val className = fim.getClass.getSimpleName
-        test(s"$className - ${t._2} - $run") {
+        Util.appName = s"$className - ${t._2} - x${Util.replicateNTimes} - $run"
+        test(Util.appName) {
           val path = getClass.getResource("/datasets/" + t._2).getPath
           val frequentSets = fim.execute(path, " ", t._3)
           Util.printItemsets(frequentSets)

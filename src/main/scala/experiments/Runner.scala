@@ -50,7 +50,8 @@ class Runner {
           fimInstances.filter(_._1 == 1).map(_._2.apply()).foreach(fim => {
 
             val className = fim.getClass.getSimpleName
-            println(s"\nRunning: $className - ${t._1} - $run - x${replicating}")
+            Util.appName = s"$className - ${t._1} - x$replicating - $run"
+            println(s"\nRunning: ${Util.appName}")
             println(s"($currentRun / $totalRuns)")
             fim.execute(t._2, " ", t._3)
             //Util.printItemsets(frequentSets)

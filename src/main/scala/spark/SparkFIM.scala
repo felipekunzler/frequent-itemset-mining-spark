@@ -23,15 +23,16 @@ trait SparkFIM extends FIM {
     */
   override def findFrequentItemsets(fileName: String, separator: String, transactions: List[Itemset], minSupport: Double): List[Itemset] = {
     var spark: SparkSession = null
+    val appName = Util.appName
     if (!Runner.clusterMode) {
       spark = SparkSession.builder()
-        .appName("FIM")
+        .appName(appName)
         .master("local[4]")
         //.config("spark.eventLog.enabled", "true")
         .getOrCreate()
     }
     else {
-      spark = SparkSession.builder().getOrCreate()
+      spark = SparkSession.builder().appName(appName).getOrCreate()
     }
 
     val sc = spark.sparkContext

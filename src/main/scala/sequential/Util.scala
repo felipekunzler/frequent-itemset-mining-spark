@@ -10,6 +10,7 @@ object Util {
 
   var replicateNTimes: Int = 1
   var minPartitions: Int = 8
+  var appName = "FIM"
 
   def absoluteSupport(minSupport: Double, numTransactions: Int) = (numTransactions * minSupport + 0.5).toInt
 
