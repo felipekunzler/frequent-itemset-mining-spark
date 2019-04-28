@@ -60,7 +60,12 @@ class DatasetsFIMTest extends FunSuite with BeforeAndAfterAll {
     val header = Seq("Class ", "Dataset ") ++ (1 to runNTimes).map(i => s" Run $i ") :+ "Mean "
     var prevDataset = ""
     val rows = executionTimes.flatMap(t => {
-      val mean = t._2.sum / runNTimes
+      var mean = 0d
+      if (runNTimes >= 3)
+        mean = (t._2.sum - t._2.max) / (runNTimes - 1)
+      else
+        mean = t._2.sum / runNTimes
+
       val r = List(Seq(s" ${t._1._1} ", s" ${t._1._2} ") ++ t._2.map(formatExecution(_)) :+ formatExecution(mean))
       if (prevDataset != t._1._2 && !prevDataset.isEmpty) {
         prevDataset = t._1._2
