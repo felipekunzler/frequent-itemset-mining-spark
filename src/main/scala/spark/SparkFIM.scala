@@ -45,11 +45,20 @@ trait SparkFIM extends FIM {
     if (!fileName.isEmpty) {
       // Fetch transaction
       val file = List.fill(Util.replicateNTimes)(fileName).mkString(",")
-      transactionsRDD = sc.textFile(file, Util.minPartitions)
-        .filter(!_.trim.isEmpty)
+      var fileRDD: RDD[String] = null
+      if (Util.minPartitions == -1)
+        fileRDD = sc.textFile(file)
+      else
+        fileRDD = sc.textFile(file, Util.minPartitions)
+
+      transactionsRDD = fileRDD.filter(!_.trim.isEmpty)
         .map(_.split(separator + "+"))
         .map(l => l.map(_.trim).toList)
-        .cache()
+
+      if (Util.props.getProperty("fim.cache", "false").toBoolean) {
+        transactionsRDD = transactionsRDD.cache()
+        println("cached")
+      }
       support = absoluteSupport(minSupport, transactionsRDD.count().toInt)
     }
     else {
@@ -67,6 +76,17 @@ trait SparkFIM extends FIM {
     val frequentItemsets = findFrequentItemsets(transactionsRDD, singletonsRDD, support, spark, sc)
 
     executionTime = System.currentTimeMillis() - t0
+
+    if (Util.props.getProperty("fim.unpersist", "false").toBoolean) {
+      transactionsRDD.unpersist()
+      println("unpersited")
+    }
+
+    if (Util.props.getProperty("fim.closeContext", "false").toBoolean) {
+      spark.sparkContext.stop()
+      println("stopped")
+    }
+
     frequentItemsets
   }
 

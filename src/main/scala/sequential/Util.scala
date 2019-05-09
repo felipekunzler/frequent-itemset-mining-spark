@@ -1,5 +1,7 @@
 package sequential
 
+import java.util.Properties
+
 import sequential.Apriori.Itemset
 import sequential.NaiveFIM.Rule
 
@@ -11,6 +13,7 @@ object Util {
   var replicateNTimes: Int = 1
   var minPartitions: Int = 8
   var appName = "FIM"
+  var props: Properties = _
 
   def absoluteSupport(minSupport: Double, numTransactions: Int) = (numTransactions * minSupport + 0.5).toInt
 

@@ -38,6 +38,12 @@ class Runner {
 
   def run(): Unit = {
     Util.minPartitions = getInt("fim.minPartitions")
+    Util.props = properties
+
+    // Spark warm-up run
+    val path = properties.getProperty("fim.dataset.mushroom.path")
+    new spark.YAFIM().execute(path, " ", .99)
+
     val totalRuns = replicatingDataset.length * datasets.size * runNTimes * fimInstances.count(_._1 == 1)
     var currentRun = 1
 
@@ -73,19 +79,13 @@ class Runner {
   }
 
   def printExecutionsForReplication(replication: Int): Unit = {
-    val header = Seq("Class ", "Dataset ") ++ (1 to runNTimes).map(i => s" Run $i ") :+ "Mean "
+    val header = Seq("Class ", "Dataset ") ++ (1 to runNTimes).map(i => s" Run $i ") ++ List("Mean ", "SD ")
     var prevDataset = ""
     val rows = executionTimes(replication).flatMap(t => {
-      var mean = 0d
-      if (runNTimes >= 3)
-        mean = (t._2.sum - t._2.max) / (runNTimes - 1)
-      else
-        mean = t._2.sum / runNTimes
-
-      val r = List(Seq(s" ${t._1._1} ", s" ${t._1._2} ") ++ t._2.map(formatExecution(_)) :+ formatExecution(mean))
+      val r = List((Seq(s" ${t._1._1} ", s" ${t._1._2} ") ++ t._2.map(formatExecution(_)) :+ formatExecution(mean(t._2))) :+ formatExecution(stdDev(t._2)))
       if (prevDataset != t._1._2 && !prevDataset.isEmpty) {
         prevDataset = t._1._2
-        1.to(runNTimes + 3, 1).map(_ => "") +: r
+        1.to(runNTimes + 4, 1).map(_ => "") +: r
       }
       else {
         prevDataset = t._1._2
@@ -102,17 +102,25 @@ class Runner {
     val rows = sets.flatMap(set => {
       // assuming that execution times has same order as header
       val row = s" $set " +: executionTimes(replication).filter(t => t._1._2 == set).map(t => {
-        var mean = 0d
-        if (runNTimes >= 3)
-          mean = (t._2.sum - t._2.max) / (runNTimes - 1)
-        else
-          mean = t._2.sum / runNTimes
+        val mean = t._2.sum / runNTimes
         formatExecution(mean)
       }).toList
       List(row)
     })
 
     println(s"\n" + Util.Tabulator.format(header +: rows))
+  }
+
+  def reverseSeqs(seqs: Seq[Seq[String]]) = {
+    var reverseSeqs: Seq[Seq[String]] = Seq()
+    for (i <- seqs.head.indices) {
+      var reverseSeq: Seq[String] = Seq()
+      for (j <- seqs.indices) {
+        reverseSeq = reverseSeq :+ seqs(j)(i)
+      }
+      reverseSeqs = reverseSeqs :+ reverseSeq
+    }
+    reverseSeqs
   }
 
   def formatExecution(value: Double): String = {
@@ -140,5 +148,17 @@ class Runner {
     .map(d => {
       (d._1, properties.getProperty(d._2 + ".path"), properties.getProperty(d._2 + ".support").toDouble)
     })
+
+  import Numeric.Implicits._
+
+  def mean[T: Numeric](xs: Iterable[T]): Double = xs.sum.toDouble / xs.size
+
+  def variance[T: Numeric](xs: Iterable[T]): Double = {
+    val avg = mean(xs)
+
+    xs.map(_.toDouble).map(a => math.pow(a - avg, 2)).sum / xs.size
+  }
+
+  def stdDev[T: Numeric](xs: Iterable[T]): Double = math.sqrt(variance(xs))
 
 }

@@ -41,6 +41,7 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   val hashes = mutable.Map[String, Int]()
   for (i <- items.indices) {
     hashes.update(items(i), i % Math.max(size, items.size / size))
+    //hashes.update(items(i), i % size)
   }
 
   for (candidate <- candidates) {
