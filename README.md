@@ -22,10 +22,12 @@ The three distributed FIM algorithms were compared in terms of execution time an
 All experiments were run on Amazon EMR using m5.xlarge (dual core) machines.
 
 * Execution time in seconds. Datasets replicated 9 times and increasing cluster size.
+
 <kbd><img src="https://user-images.githubusercontent.com/9336586/58119272-f845ff00-7bd8-11e9-8c78-86304556fe52.png" height="275" width="400"></kbd> <kbd><img src="https://user-images.githubusercontent.com/9336586/58119293-03009400-7bd9-11e9-9724-0dcbed6b3b00.png" height="275" width="400"></kbd>
 <kbd><img src="https://user-images.githubusercontent.com/9336586/58120009-b027dc00-7bda-11e9-9da9-e09b20670c0b.png" height="275" width="400"></kbd> <kbd><img src="https://user-images.githubusercontent.com/9336586/58119984-9e463900-7bda-11e9-8bec-c9a012effb42.png" height="275" width="400"></kbd>
 
 * Normalized speedup factor, if the number of cores is increased to 10, the ideal speedup factor is 10 (meaning that the execution time has decreased by 10 times). Datasets replicated 9 times and increasing cluster size (X axis measured in cores).
+
 <kbd><img src="https://user-images.githubusercontent.com/9336586/58120022-ba49da80-7bda-11e9-81b9-14d827e246bf.png" height="275" width="400"></kbd> <kbd><img src="https://user-images.githubusercontent.com/9336586/58120036-c766c980-7bda-11e9-926c-9e2c5792e4c0.png" height="275" width="400"></kbd>
 <kbd><img src="https://user-images.githubusercontent.com/9336586/58120028-c0d85200-7bda-11e9-8c25-f6891c13d047.png" height="275" width="400"></kbd> <kbd><img src="https://user-images.githubusercontent.com/9336586/58120051-cdf54100-7bda-11e9-8ff1-11fe543f3093.png" height="275" width="400"></kbd>
 
@@ -34,7 +36,7 @@ All experiments were run on Amazon EMR using m5.xlarge (dual core) machines.
 * Adjust the absolute path for the provided datasets in `src/main/resources/defaultfim.properties`
 * Run the experiments with `sbt run` and select the main class `experiments.Runner`
 
-Would output the following (execution times in seconds):
+Sample output (execution times in seconds):
 ```
 +-----------------+------------+-------+-------+-------+-------+------+
 |           Class |    Dataset | Run 1 | Run 2 | Run 3 |  Mean |   SD |
@@ -60,7 +62,7 @@ Would output the following (execution times in seconds):
 +------------+-----------------+----------+---------------+----------+------+
 ```
 
-Additionally, individual algorithms can be run individually by instantiating its respective class. Example:
+Additionally, algorithms can be run individually by instantiating its respective class. Example:
 ```scala
 object Main {
   def main(args: Array[String]): Unit = {
