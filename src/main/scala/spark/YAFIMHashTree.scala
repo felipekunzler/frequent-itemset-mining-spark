@@ -5,7 +5,6 @@ import org.apache.spark.rdd.RDD
 import sequential.Apriori.Itemset
 import sequential.hashtree.HashTree
 
-// TODO: cache pruned transactionsRDDs?
 /**
   * Notes:
   * - Missed broadcast on hash tree. 10s imporvement.
