@@ -30,6 +30,7 @@ class YAFIM extends SparkFIM with Serializable {
                                     spark: SparkSession, sc: SparkContext): List[Itemset] = {
 
     val frequentItemsets = mutable.Map(1 -> singletons.map(_._1).map(List(_)).collect().toList)
+    println(s"Number of singletons: ${frequentItemsets(1).size}")
     var k = 1
     while (frequentItemsets.get(k).nonEmpty) {
       k += 1
@@ -40,8 +41,8 @@ class YAFIM extends SparkFIM with Serializable {
       // Final filter by checking with all transactions
       val kFrequentItemsets = filterFrequentItemsets(candidates, transactions, minSupport, sc)
       if (kFrequentItemsets.nonEmpty) {
-        if (k == 2) println(s"Found ${kFrequentItemsets.size} frequents for k=2.")
         frequentItemsets.update(k, kFrequentItemsets)
+        println(s"Number of itemsets with size $k: ${frequentItemsets(k).size}")
       }
     }
     frequentItemsets.values.flatten.toList

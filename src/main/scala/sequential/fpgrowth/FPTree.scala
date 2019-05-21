@@ -41,7 +41,7 @@ class FPTree(transactions: List[(Itemset, Int)], minSupport: Int, val singletons
     }
   }
 
-  //println(s"Built fp-tree for ${transactions.size} transactions in ${System.currentTimeMillis() - t0}ms.")
+  //println(s"Built fp-tree for ${transactions.size} transactions and ${singletons.size} singletons in ${System.currentTimeMillis() - t0}ms.")
 
   /*
     * TODO: Currently contains infrequent items (say b:2 for sup 3)
