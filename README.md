@@ -32,6 +32,8 @@ All experiments were run on Amazon EMR using m5.xlarge (dual core) machines.
 <kbd><img src="https://user-images.githubusercontent.com/9336586/58120028-c0d85200-7bda-11e9-8c25-f6891c13d047.png" height="275" width="400"></kbd> <kbd><img src="https://user-images.githubusercontent.com/9336586/58120051-cdf54100-7bda-11e9-8ff1-11fe543f3093.png" height="275" width="400"></kbd>
 
 ### Building and running
+* Install and set Java 8 to your path, e.g. `sdk install java 8.0.252.hs-adpt` and `sdk use java 8.0.252.hs-adpt`
+* Instsall sbt, e.g. `sdk install sbt`
 * Compile the project using `sbt compile`
 * Adjust the absolute path for the provided datasets in `src/main/resources/defaultfim.properties`
 * Run the experiments with `sbt run` and select the main class `experiments.Runner`
