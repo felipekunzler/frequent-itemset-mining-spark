@@ -1,4 +1,9 @@
 # Frequent Itemset Mining in Scala and Spark
+Implementation of Apriori and FP-Growth in Scala, as well as their counterpart distributed implementations YAFIM, RApriori and DFPS using Spark.
+
+This work has been developed as part of my [CS undergraduate thesis](./Final%20Paper%20-%20pt_BR.pdf) where three previously proposed distributed algorithms were implemented in Spark and compared on [Amazon EMR](https://aws.amazon.com/emr/).
+
+### Algorithms
 * Sequential implementation of Apriori and FP-Growth in Scala.
   * [Apriori.scala](https://github.com/felipekunzler/frequent-itemset-mining-spark/blob/master/src/main/scala/sequential/Apriori.scala)
   * [FPGrowth.scala](https://github.com/felipekunzler/frequent-itemset-mining-spark/tree/master/src/main/scala/sequential/fpgrowth/FPGrowth.scala) and [FPTree.scala](https://github.com/felipekunzler/frequent-itemset-mining-spark/tree/master/src/main/scala/sequential/fpgrowth/FPTree.scala)

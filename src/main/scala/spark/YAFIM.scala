@@ -74,7 +74,7 @@ class YAFIM extends SparkFIM with Serializable {
     val candidatesBC = sc.broadcast(candidates)
     val filteredCandidatesRDD = transactionsRDD.flatMap(t => {
       candidatesBC.value.flatMap(c => {
-        // candidate exists within the transaction
+        // Candidate exists within the transaction
         //if (t.intersect(itemset).size == itemset.size) { TODO: Why intersect so much slower?
         if (apriori.candidateExistsInTransaction(c, t))
           List(c)

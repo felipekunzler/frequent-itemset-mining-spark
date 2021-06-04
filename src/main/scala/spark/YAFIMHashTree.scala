@@ -13,7 +13,7 @@ class YAFIMHashTree extends YAFIM {
 
   override def filterFrequentItemsets(candidates: List[Itemset], transactionsRDD: RDD[Itemset], minSupport: Int, sc: SparkContext) = {
     if (candidates.nonEmpty) {
-      val items = candidates.flatten.distinct // todo: actually helps, or should just use singletons?
+      val items = candidates.flatten.distinct // TODO: actually helps, or should just use singletons?
       val hashTree = new HashTree(candidates, items)
       val hashTreeBC = sc.broadcast(hashTree)
 

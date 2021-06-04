@@ -19,6 +19,9 @@ object Runner {
 
 }
 
+/**
+ * Helper class to run the experiments. 
+ */
 class Runner {
 
   val fimProperties = getClass.getResourceAsStream("/fim.properties")

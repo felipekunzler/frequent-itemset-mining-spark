@@ -53,7 +53,7 @@ class DFPS extends SparkFIM with Serializable {
   def pruneAndSort(transaction: Itemset, singletons: Seq[String]): Itemset = {
     transaction
       .filter(i => singletons.contains(i))
-      .sortWith((a, b) => singletons.indexOf(a) < singletons.indexOf(b)) // todo: anyway to speedup initial sorting?
+      .sortWith((a, b) => singletons.indexOf(a) < singletons.indexOf(b)) // TODO: anyway to speedup initial sorting?
   }
 
 }

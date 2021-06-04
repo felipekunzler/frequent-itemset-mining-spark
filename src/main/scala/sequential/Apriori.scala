@@ -7,10 +7,10 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  * 1. Encontrar 1-itemsets frequentes
-  * 2. Encontrar 2-itemsets frequentes, tendo a iteração anterior como input
+  * 1. Find all frequent 1-itemsets
+  * 2. Find all frequent 2-itemsets, having the last iteration as the input
   * 3. ...
-  * 4. Até não ter mais itemsets frequentes
+  * 4. Loop until no more frequent itemsets are found
   */
 object Apriori {
 

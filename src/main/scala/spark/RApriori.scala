@@ -16,7 +16,7 @@ class RApriori extends YAFIMHashTree {
       singletons.foreach(bf.add)
       val bfBC = sc.broadcast(bf)
 
-      transactions.map(t => t.filter(bfBC.value.mightContain(_))) // singletons.contains(_)
+      transactions.map(t => t.filter(bfBC.value.mightContain(_)))
         .flatMap(_.combinations(2))
         .map((_, 1))
         .reduceByKey(_ + _)

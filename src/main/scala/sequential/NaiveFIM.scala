@@ -7,8 +7,8 @@ import sequential.Util.printItemsets
 import scala.collection.mutable
 
 /**
-  * 1. Gerar combinações de itemsets candidatos
-  * 2. Filtrar de acordo com suporte minimo
+  * 1. Generate candidate itemset combinations 
+  * 2. Filter according to minimum support 
   */
 object NaiveFIM {
 
@@ -88,8 +88,8 @@ class NaiveFIM extends FIM {
     * A, C -> B
     * B, C -> A
     *
-    * 1. Gera todos os subsets
-    * 2. Para cada set, usa como left hand, e gera todos substes sem o que está na esquerda
+    * 1. Generaete all possible subsets
+    * 2. Foreach set, use it as left hand, and generate all subsets without the on the left 
     */
   def combinations(transactions: List[List[String]]): List[Rule] = {
     var combinations = List[Rule]()

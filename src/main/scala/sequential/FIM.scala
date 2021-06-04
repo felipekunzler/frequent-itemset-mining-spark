@@ -2,6 +2,9 @@ package sequential
 
 import sequential.Apriori.Itemset
 
+/**
+  * Common interface for all FIM implementations. 
+  */
 trait FIM {
 
   def findFrequentItemsets(fileName: String = "", separator: String = "", transactions: List[Itemset], minSupport: Double): List[Itemset]

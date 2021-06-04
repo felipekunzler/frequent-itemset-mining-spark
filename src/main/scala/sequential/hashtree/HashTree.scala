@@ -37,11 +37,11 @@ class HashTree(val candidates: List[Itemset], val items: List[String]) extends S
   val rootNode = new Node(0)
 
   val t0 = System.currentTimeMillis()
-  // todo: would group by ratio help?
+  // TODO: would group by ratio help?
   val hashes = mutable.Map[String, Int]()
   for (i <- items.indices) {
     hashes.update(items(i), i % Math.max(size, items.size / size))
-    //hashes.update(items(i), i % size)
+    //hashes.update(items(i), i % size) alternative implementation
   }
 
   for (candidate <- candidates) {
